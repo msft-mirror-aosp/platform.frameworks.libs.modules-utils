@@ -15,14 +15,28 @@
 
 java_library {
     name: "modules-utils-os",
-
     srcs: [
-        "src/**/*.java",
+        "java/**/*.aidl",
+        "java/**/*.java",
     ],
     sdk_version: "module_current",
     min_sdk_version: "30",
+    visibility: ["//visibility:public"],
     apex_available: [
         "//apex_available:anyapex",
         "//apex_available:platform",
+    ],
+}
+
+filegroup {
+    name: "module-utils-os-aidls",
+    srcs: [
+        "java/com/android/modules/utils/ParceledListSlice.aidl",
+        "java/com/android/modules/utils/StringParceledListSlice.aidl",
+    ],
+    path: "java",
+    visibility: [
+        "//frameworks/base/wifi",
+        "//packages/modules/Wifi/framework",
     ],
 }
