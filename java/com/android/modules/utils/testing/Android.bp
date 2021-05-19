@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,29 +18,12 @@ package {
 }
 
 java_library {
-    name: "modules-utils-os",
-    srcs: [
-        "java/**/*.aidl",
-        "java/**/*.java",
+    name: "modules-utils-native-coverage-listener",
+    srcs: ["NativeCoverageHackInstrumentationListener.java"],
+    static_libs: [
+        "androidx.test.rules",
     ],
-    sdk_version: "module_current",
-    min_sdk_version: "30",
+    sdk_version: "test_current",
+    min_sdk_version: "29",
     visibility: ["//visibility:public"],
-    apex_available: [
-        "//apex_available:anyapex",
-        "//apex_available:platform",
-    ],
-}
-
-filegroup {
-    name: "module-utils-os-aidls",
-    srcs: [
-        "java/com/android/modules/utils/ParceledListSlice.aidl",
-        "java/com/android/modules/utils/StringParceledListSlice.aidl",
-    ],
-    path: "java",
-    visibility: [
-        "//frameworks/base/wifi",
-        "//packages/modules/Wifi/framework",
-    ],
 }
