@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_library_static {
-    name: "libmodules-utils-build",
+java_library {
+    name: "modules-utils-native-coverage-listener",
+    srcs: ["NativeCoverageHackInstrumentationListener.java"],
+    static_libs: [
+        "androidx.test.rules",
+    ],
+    sdk_version: "test_current",
     min_sdk_version: "29",
-    export_include_dirs: ["include"],
-    static_libs: ["libbase"],
     visibility: ["//visibility:public"],
-    apex_available: ["//apex_available:anyapex"],
 }
