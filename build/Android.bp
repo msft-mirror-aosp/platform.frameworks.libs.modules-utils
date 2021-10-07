@@ -14,16 +14,8 @@
 // limitations under the License.
 //
 
-java_library {
-    name: "modules-utils-build",
-    srcs: ["src/**/*.java"],
-    sdk_version: "module_current",
-    min_sdk_version: "29",
-    visibility: ["//visibility:public"],
-    apex_available: [
-        "//apex_available:anyapex",
-        "//apex_available:platform",
-    ],
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 cc_library_static {

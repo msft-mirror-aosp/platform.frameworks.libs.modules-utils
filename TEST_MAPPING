@@ -2,17 +2,22 @@
 {
   "presubmit": [
     {
-      // Unit tests for service-wifi.jar
-      "name": "FrameworksWifiTests"
-    },
-    {
       // Unit tests for framework-wifi.jar
       "name": "FrameworksWifiApiTests"
+    },
+    {
+      "name": "ModulesUtilsTests"
     }
     // TODO: Re-enable when this is stable.
     // {
       // Wifi CTS tests
       // "name": "CtsWifiTestCases"
     // }
+  ],
+  "presubmit-large": [
+    {
+      // Unit tests for service-wifi.jar
+      "name": "FrameworksWifiTests"
+    }
   ]
 }
