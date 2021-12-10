@@ -20,7 +20,7 @@ package {
 filegroup {
     name: "framework-annotations",
     srcs: [
-        "android/annotation/*.java",
+        ":framework-metalava-annotations",
         "com/android/internal/annotations/*.java",
     ],
 
@@ -39,6 +39,18 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-metalava-annotations",
+    srcs: ["android/annotation/*.java"],
+    visibility: [
+        // This group of files is needed by any metalava invocation that enabled enhancement of
+        // documentation (via javadoc tags like @paramDoc and @returnDoc). They are public for
+        // this purpose. However, java compilation should generally depend (dynamically) on
+        // framework-annotations-lib instead.
+        "//visibility:public",
+    ],
+}
+
 java_library {
     name: "framework-annotations-lib",
     srcs: [":framework-annotations"],
@@ -51,6 +63,7 @@ java_library {
 filegroup {
     name: "framework-api-annotations",
     srcs: [
+        "android/annotation/Discouraged.java",
         "android/annotation/SystemApi.java",
         "android/annotation/TestApi.java",
     ],
@@ -88,4 +101,3 @@ filegroup {
         "//frameworks/base/core/java",
     ],
 }
-

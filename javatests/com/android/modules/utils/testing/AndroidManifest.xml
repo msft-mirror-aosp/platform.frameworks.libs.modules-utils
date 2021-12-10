@@ -16,8 +16,12 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.modules.utils">
+          package="com.android.modules.utils.testing">
+
+    <application android:debuggable="true">
+        <uses-library android:name="android.test.runner" />
+    </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-            android:targetPackage="com.android.modules.utils"/>
+            android:targetPackage="com.android.modules.utils.testing"/>
 </manifest>
