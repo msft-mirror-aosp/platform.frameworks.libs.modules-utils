@@ -18,24 +18,32 @@ package {
 }
 
 android_test {
-    name: "ModulesUtilsTests",
+    name: "ModulesUtilsTestingTests",
 
     sdk_version: "module_current",
     min_sdk_version: "29",
 
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
+    ],
+
     srcs: ["*.java"],
 
     static_libs: [
-        "androidx.test.rules",
+        "androidx.test.core",
         "androidx.test.runner",
-        "modules-utils-backgroundthread",
-        "modules-utils-bytesmatcher",
-        "modules-utils-list-slice",
-        "modules-utils-shell-command-handler",
-        "modules-utils-synchronous-result-receiver",
+        "androidx.test.rules",
+        "platform-test-annotations",
+        "truth-prebuilt",
     ],
 
-    libs: ["android.test.runner"],
+    libs: [
+        "android.test.mock",
+        "android.test.runner",
+    ],
 
-    test_suites: ["general-tests"],
+    test_suites: [
+        "general-tests",
+        "mts",
+    ],
 }
