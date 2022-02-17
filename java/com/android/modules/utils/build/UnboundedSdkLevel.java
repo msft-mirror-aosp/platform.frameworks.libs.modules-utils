@@ -17,7 +17,6 @@
 package com.android.modules.utils.build;
 
 import android.os.Build;
-import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
 
@@ -53,8 +52,7 @@ public final class UnboundedSdkLevel {
                     Build.VERSION.SDK_INT,
                     Build.VERSION.CODENAME,
                     SdkLevel.isAtLeastT()
-                            // Build.VERSION.KNOWN_CODENAMES
-                            ? new ArraySet<>(new String[]{"Q", "R", "S", "Sv2", "Tiramisu"})
+                            ? Build.VERSION.KNOWN_CODENAMES
                             : Collections.emptySet());
 
     private final int mSdkInt;
