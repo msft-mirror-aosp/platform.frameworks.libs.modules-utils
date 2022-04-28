@@ -40,18 +40,21 @@ public final class SdkLevel {
     }
 
     /** Checks if the device is running on a release version of Android S or newer. */
-    @ChecksSdkIntAtLeast(api = 31 /* Build.VERSION_CODES.S */, codename = "S")
+    @ChecksSdkIntAtLeast(api = 31 /* Build.VERSION_CODES.S */)
     public static boolean isAtLeastS() {
         return SDK_INT >= 31;
     }
 
-    /**
-     * Checks if the device is running on a pre-release version of Android T or a release version of
-     * Android T or newer.
-     */
-    @ChecksSdkIntAtLeast(codename = "T")
+    /** Checks if the device is running on a release version of Android S_V2 or newer */
+    @ChecksSdkIntAtLeast(api = 32 /* BUILD.VERSION_CODES.Sv2 */)
+    public static boolean isAtLeastSv2() {
+        return SDK_INT >= 32;
+    }
+
+    /** Checks if the device is running on a release version of Android Tiramisu or newer */
+    @ChecksSdkIntAtLeast(api = 33 /* BUILD_VERSION_CODES.Tiramisu */)
     public static boolean isAtLeastT() {
-        return isAtLeastPreReleaseCodename("T");
+        return SDK_INT >= 33;
     }
 
     private static boolean isAtLeastPreReleaseCodename(@NonNull String codename) {
