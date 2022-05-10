@@ -18,24 +18,14 @@ package {
 }
 
 android_test {
-    name: "ModulesUtilsTests",
-
-    sdk_version: "module_current",
-    min_sdk_version: "29",
-
-    srcs: ["*.java"],
-
+    name: "UnboundedSdkLevelTest",
+    srcs: ["UnboundedSdkLevelTest.java"],
     static_libs: [
-        "androidx.test.rules",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
         "androidx.test.runner",
-        "modules-utils-backgroundthread",
-        "modules-utils-bytesmatcher",
-        "modules-utils-list-slice",
-        "modules-utils-shell-command-handler",
-        "modules-utils-synchronous-result-receiver",
+        "modules-utils-build",
+        "truth-prebuilt",
     ],
-
-    libs: ["android.test.runner"],
-
     test_suites: ["general-tests"],
 }
