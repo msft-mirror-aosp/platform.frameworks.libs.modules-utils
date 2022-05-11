@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,36 @@ import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Indicates that Lint should ignore the specified warnings for the annotated element. */
-@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
-@Retention(RetentionPolicy.CLASS)
-public @interface SuppressLint {
+/**
+ * The annotated element is considered deprecated in the public SDK. This will be turned into a
+ * plain &#64;Deprecated annotation in the SDK.
+ *
+ * <p>The value parameter should be the message to include in the documentation as a &#64;deprecated
+ * comment.
+ *
+ * @hide
+ */
+@Retention(SOURCE)
+@Target(value = {CONSTRUCTOR, FIELD, LOCAL_VARIABLE, METHOD, PACKAGE, PARAMETER, TYPE})
+public @interface DeprecatedForSdk {
     /**
-     * The set of warnings (identified by the lint issue id) that should be
-     * ignored by lint. It is not an error to specify an unrecognized name.
+     * The message to include in the documentation, which will be merged in as a &#64;deprecated
+     * tag.
      */
-    String[] value();
+    String value();
+
+    /**
+     * If specified, one or more annotation classes corresponding to particular API surfaces where
+     * the API will <b>not</b> be marked as deprecated, such as {@link SystemApi} or {@link
+     * TestApi}.
+     */
+    Class<?>[] allowIn() default {};
 }
