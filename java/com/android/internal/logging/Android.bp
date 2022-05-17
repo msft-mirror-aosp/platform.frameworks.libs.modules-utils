@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,28 +14,22 @@
 // limitations under the License.
 
 package {
-    default_applicable_licenses: ["Android-Apache-2.0"],
+    default_applicable_licenses: ["Android-Apache-2.0"]
 }
 
-android_test {
-    name: "ModulesUtilsTests",
-
+// This library provides an UIEventLogger interface, which needs to be
+// implemented by each module, since the implementation needs to use the local
+// StatsLog. There is also already an implementation available in
+// frameworks/base: uieventloggerlib.
+java_library {
+    name: "modules-utils-uieventlogger-interface",
+    srcs: ["*.java"],
     sdk_version: "module_current",
     min_sdk_version: "29",
-
-    srcs: ["*.java"],
-
-    static_libs: [
-        "androidx.test.rules",
-        "androidx.test.runner",
-        "modules-utils-backgroundthread",
-        "modules-utils-bytesmatcher",
-        "modules-utils-list-slice",
-        "modules-utils-shell-command-handler",
-        "modules-utils-synchronous-result-receiver",
+    libs: ["framework-annotations-lib"],
+    visibility: ["//visibility:public"],
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform"
     ],
-
-    libs: ["android.test.runner"],
-
-    test_suites: ["general-tests"],
 }

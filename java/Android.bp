@@ -55,6 +55,7 @@ java_library {
     name: "framework-annotations-lib",
     srcs: [":framework-annotations"],
     sdk_version: "core_current",
+    host_supported: true,
     visibility: [
         "//visibility:public",
     ],
@@ -86,6 +87,18 @@ filegroup {
         "//frameworks/base/wifi",
         "//packages/modules/Wifi/framework",
         "//frameworks/libs/modules-utils/java/com/android/modules/utils",
+    ],
+}
+
+filegroup {
+    name: "modules-utils-synchronous-result-receiver-aidl",
+    srcs: [
+        "com/android/modules/utils/ISynchronousResultReceiver.aidl",
+        "com/android/modules/utils/SynchronousResultReceiver.aidl",
+    ],
+    visibility: [
+        "//frameworks/libs/modules-utils/java/com/android/modules/utils",
+        "//packages/modules/Bluetooth/system/binder",
     ],
 }
 
