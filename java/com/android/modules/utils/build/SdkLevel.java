@@ -51,10 +51,13 @@ public final class SdkLevel {
         return SDK_INT >= 32;
     }
 
-    /** Checks if the device is running on a release version of Android Tiramisu or newer */
-    @ChecksSdkIntAtLeast(api = 33 /* BUILD_VERSION_CODES.Tiramisu */)
+    /**
+     * Checks if the device is running on a pre-release version of Android T or a release version of
+     * Android T or newer.
+     */
+    @ChecksSdkIntAtLeast(codename = "T")
     public static boolean isAtLeastT() {
-        return SDK_INT >= 33;
+        return isAtLeastPreReleaseCodename("T");
     }
 
     private static boolean isAtLeastPreReleaseCodename(@NonNull String codename) {

@@ -29,7 +29,8 @@ import java.util.concurrent.Executor;
  *           used. To dispatch events through the main thread of your
  *           application, you can use
  *           {@link android.content.Context#getMainExecutor() Context.getMainExecutor()}.
- *           Otherwise, provide an {@link Executor} that dispatches to an appropriate thread.
+ *           To dispatch events through a shared thread pool, you can use
+ *           {@link android.os.AsyncTask#THREAD_POOL_EXECUTOR AsyncTask#THREAD_POOL_EXECUTOR}.
  * @hide
  */
 @Retention(SOURCE)

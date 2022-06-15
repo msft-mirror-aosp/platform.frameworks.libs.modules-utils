@@ -27,9 +27,7 @@ java_defaults {
         "//apex_available:anyapex",
         "//apex_available:platform",
     ],
-    defaults_visibility: [
-        "//frameworks/libs/modules-utils/java:__subpackages__",
-    ],
+    defaults_visibility: [":__subpackages__"],
 }
 
 java_library {

@@ -1,2 +1,0 @@
--keep class * extends junit.framework.Test { *; }
--keep class * extends junit.framework.TestCase { *; }
