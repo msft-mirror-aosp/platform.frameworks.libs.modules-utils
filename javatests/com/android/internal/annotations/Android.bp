@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package {
 }
 
 android_test {
-    name: "ModulesUtilsTests",
+    name: "InternalAnnotationsTests",
 
     sdk_version: "module_current",
     min_sdk_version: "29",
@@ -28,14 +28,19 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "androidx.test.runner",
-        "modules-utils-backgroundthread",
-        "modules-utils-bytesmatcher",
-        "modules-utils-list-slice",
-        "modules-utils-shell-command-handler",
-        "modules-utils-synchronous-result-receiver",
+        "framework-annotations-lib",
     ],
 
     libs: ["android.test.runner"],
+
+    // Note: We explicitly optimize this test target to validate post-optimized
+    // code paths and their interop with annotations.
+    optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        proguard_flags_files: ["proguard.flags"],
+    },
 
     test_suites: ["general-tests"],
 }
