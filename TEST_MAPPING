@@ -6,7 +6,13 @@
       "name": "FrameworksWifiApiTests"
     },
     {
+      "name": "InternalAnnotationsTests"
+    },
+    {
       "name": "ModulesUtilsTests"
+    },
+    {
+      "name": "ComposHostTestCases"
     }
     // TODO: Re-enable when this is stable.
     // {

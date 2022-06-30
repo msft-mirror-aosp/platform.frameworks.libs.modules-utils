@@ -16,39 +16,113 @@
 
 #pragma once
 
-#include <android-base/logging.h>
-#include <android-base/properties.h>
+#include <assert.h>
+#include <ctype.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <android/api-level.h>
+#include <log/log.h>
+#include <sys/system_properties.h>
+
+#include "sdk_level.h"
 
 namespace android {
 namespace modules {
 namespace sdklevel {
 namespace unbounded {
 
-static inline auto getVersionInt(const std::string &version) {
-  std::size_t processed_chars = 0;
-  const int versionInt = std::stoi(version, &processed_chars);
-  CHECK(processed_chars == version.size());
-  return versionInt;
+inline auto getVersionInt(const char *version) {
+  LOG_ALWAYS_FATAL_IF(version[0] == '\0', "empty version");
+  char *next_char = 0;
+  const long versionInt = strtol(version, &next_char, 10);
+  LOG_ALWAYS_FATAL_IF(*next_char != '\0', "no conversion from \"%s\" to long",
+                      version);
+  LOG_ALWAYS_FATAL_IF(versionInt <= 0, "negative version: %s", version);
+  LOG_ALWAYS_FATAL_IF(versionInt > INT_MAX, "version too large: %s", version);
+  return (int)versionInt;
 }
 
-static inline bool isCodename(const std::string &version) {
-  CHECK(version.size() > 0);
-  return std::isupper(version.at(0));
+inline bool isCodename(const char *version) {
+  LOG_ALWAYS_FATAL_IF(version[0] == '\0', "empty version");
+  return isupper(version[0]);
+}
+
+struct SdkLevelAndCodenames {
+  int sdk_level;
+  const char *codenames;
+};
+
+static constexpr SdkLevelAndCodenames PREVIOUS_CODENAMES[] = {
+    {29, "Q"}, {30, "Q,R"}, {31, "Q,R,S"}, {32, "Q,R,S,Sv2"}};
+
+static char *getPreviousCodenames(int sdk_level) {
+  for (size_t i = 0;
+       i < sizeof(PREVIOUS_CODENAMES) / sizeof(PREVIOUS_CODENAMES[0]); ++i) {
+    if (sdk_level == PREVIOUS_CODENAMES[i].sdk_level) {
+      return strdup(PREVIOUS_CODENAMES[i].codenames);
+    }
+  }
+  return strdup("");
+}
+
+static char *getKnownCodenames() {
+  const prop_info *pi =
+      __system_property_find("ro.build.version.known_codenames");
+  LOG_ALWAYS_FATAL_IF(pi == nullptr, "known_codenames property doesn't exist");
+  char *codenames = nullptr;
+  // The length of this property is not limited to PROP_VALUE_MAX; therefore it
+  // cannot be requested via __system_property_get
+  __system_property_read_callback(
+      pi,
+      [](void *cookie, const char *, const char *value, unsigned) {
+        auto codenames_ptr = static_cast<const char **>(cookie);
+        *codenames_ptr = strdup(value);
+      },
+      &codenames);
+  return codenames;
+}
+
+// Checks if input version is same/previous codename of one running on device.
+static bool isKnownCodename(const char *version) {
+  LOG_ALWAYS_FATAL_IF(!isCodename(version), "input version is not a codename");
+  char *const known_codenames =
+      IsAtLeastT() ? getKnownCodenames()
+                   : getPreviousCodenames(android_get_device_api_level());
+  LOG_ALWAYS_FATAL_IF(known_codenames == nullptr, "null for known codenames");
+  char *p, *saveptr = known_codenames;
+  bool found = false;
+  // The example of known_codenames is Q,R,S,Sv2 (versions split by ',')
+  while (!found && (p = strtok_r(saveptr, ",", &saveptr))) {
+    if (strcmp(version, p) == 0) {
+      found = true;
+    }
+  }
+  free(known_codenames);
+  return found;
 }
 
 // Checks if the device is running a specific version or newer.
 // Always use specific methods IsAtLeast*() available in sdk_level.h when the
 // version is known at build time. This should only be used when a dynamic
 // runtime check is needed.
-static inline bool IsAtLeast(const std::string &version) {
-  const std::string &device_codename =
-      android::base::GetProperty("ro.build.version.codename", "");
-  if ("REL" == device_codename) {
+inline bool IsAtLeast(const char *version) {
+  char device_codename[PROP_VALUE_MAX];
+  detail::GetCodename(device_codename);
+  if (!strcmp("REL", device_codename)) {
+    if (isCodename(version)) {
+      LOG_ALWAYS_FATAL_IF(
+          isKnownCodename(version),
+          "Artifact with a known codename "
+          "%s must be recompiled with a finalized integer version.",
+          version);
+      return false;
+    }
     return android_get_device_api_level() >= getVersionInt(version);
   }
   if (isCodename(version)) {
-    return device_codename.compare(version) >= 0;
+    return isKnownCodename(version);
   }
   return android_get_device_api_level() >= getVersionInt(version);
 }
@@ -57,14 +131,22 @@ static inline bool IsAtLeast(const std::string &version) {
 // Always use specific methods IsAtLeast*() available in sdk_level.h when the
 // version is known at build time. This should only be used when a dynamic
 // runtime check is needed.
-static inline bool IsAtMost(const std::string &version) {
-  const std::string &device_codename =
-      android::base::GetProperty("ro.build.version.codename", "");
-  if ("REL" == device_codename) {
+inline bool IsAtMost(const char *version) {
+  char device_codename[PROP_VALUE_MAX];
+  detail::GetCodename(device_codename);
+  if (!strcmp("REL", device_codename)) {
+    if (isCodename(version)) {
+      LOG_ALWAYS_FATAL_IF(
+          isKnownCodename(version),
+          "Artifact with a known codename "
+          "%s must be recompiled with a finalized integer version.",
+          version);
+      return true;
+    }
     return android_get_device_api_level() <= getVersionInt(version);
   }
   if (isCodename(version)) {
-    return device_codename.compare(version) <= 0;
+    return !isKnownCodename(version) || strcmp(version, device_codename) == 0;
   }
   return android_get_device_api_level() < getVersionInt(version);
 }
