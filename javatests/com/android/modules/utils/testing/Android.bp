@@ -33,7 +33,6 @@ android_test {
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.rules",
-        "modules-utils-build",
         "platform-test-annotations",
         "truth-prebuilt",
     ],
@@ -45,6 +44,6 @@ android_test {
 
     test_suites: [
         "general-tests",
-        "mts",
+        "mts-mainline-infra",
     ],
 }
