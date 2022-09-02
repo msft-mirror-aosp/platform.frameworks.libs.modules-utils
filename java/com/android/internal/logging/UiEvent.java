@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package android.annotation;
+package com.android.internal.logging;
 
-import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.concurrent.Executor;
 
-/**
- * @paramDoc Callback and listener events are dispatched through this
- *           {@link Executor}, providing an easy way to control which thread is
- *           used. To dispatch events through the main thread of your
- *           application, you can use
- *           {@link android.content.Context#getMainExecutor() Context.getMainExecutor()}.
- *           Otherwise, provide an {@link Executor} that dispatches to an appropriate thread.
- * @hide
- */
 @Retention(SOURCE)
-@Target(PARAMETER)
-public @interface CallbackExecutor {
+@Target(FIELD)
+public @interface UiEvent {
+    /** An explanation, suitable for Android analysts, of the UI event that this log represents. */
+    String doc();
 }
