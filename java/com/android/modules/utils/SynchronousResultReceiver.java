@@ -25,14 +25,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
-
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,57 +39,17 @@ import java.util.concurrent.TimeoutException;
  * Allow the server end to synchronously wait on the response from the client.
  * This enables an RPC like system but with the ability to timeout and discard late results.
  *
- * <p>NOTE: Use the static {@link #get} method to retrieve an available instance of this class.
- * If no instances are available, a new one is created.
+ * <p>NOTE: Can only be used for one response.
+ * Subsequent responses on the same instance will throw a {@link IllegalStateException}
  */
 public final class SynchronousResultReceiver<T> implements Parcelable {
     private static final String TAG = "SynchronousResultReceiver";
     private final boolean mLocal;
     private boolean mIsCompleted;
-    private final static Object sLock = new Object();
-    private final static int QUEUE_THRESHOLD = 4;
 
-    @GuardedBy("sLock")
-    private CompletableFuture<Result<T>> mFuture = new CompletableFuture<>();
-
-    @GuardedBy("sLock")
-    private static final ConcurrentLinkedQueue<SynchronousResultReceiver> sAvailableReceivers
-            = new ConcurrentLinkedQueue<>();
-
-    public static <T> SynchronousResultReceiver<T> get() {
-        synchronized(sLock) {
-            if (sAvailableReceivers.isEmpty()) {
-                return new SynchronousResultReceiver();
-            }
-            SynchronousResultReceiver receiver = sAvailableReceivers.poll();
-            receiver.resetLocked();
-            return receiver;
-        }
-    }
-
-    private SynchronousResultReceiver() {
+    public SynchronousResultReceiver() {
         mLocal = true;
         mIsCompleted = false;
-    }
-
-    @GuardedBy("sLock")
-    private void releaseLocked() {
-        mFuture = null;
-        if (sAvailableReceivers.size() < QUEUE_THRESHOLD) {
-            sAvailableReceivers.add(this);
-        }
-    }
-
-    @GuardedBy("sLock")
-    private void resetLocked() {
-        mFuture = new CompletableFuture<>();
-        mIsCompleted = false;
-    }
-
-    private CompletableFuture<Result<T>> getFuture() {
-       synchronized (sLock) {
-           return mFuture;
-       }
     }
 
     public static class Result<T> implements Parcelable {
@@ -148,24 +105,20 @@ public final class SynchronousResultReceiver<T> implements Parcelable {
             };
     }
 
+    private final CompletableFuture<Result<T>> mFuture = new CompletableFuture<>();
+
     private void complete(Result<T> result) {
         if (mIsCompleted) {
             throw new IllegalStateException("Receiver has already been completed");
         }
         mIsCompleted = true;
         if (mLocal) {
-            getFuture().complete(result);
-        } else {
-            final ISynchronousResultReceiver rr;
-            synchronized (this) {
-                rr = mReceiver;
-            }
-            if (rr != null) {
-                try {
-                    rr.send(result);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to complete future");
-                }
+            mFuture.complete(result);
+        } else if (mReceiver != null) {
+            try {
+                mReceiver.send(result);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to complete future");
             }
         }
     }
@@ -207,11 +160,7 @@ public final class SynchronousResultReceiver<T> implements Parcelable {
         Duration remainingTime = timeout;
         while (!remainingTime.isNegative()) {
             try {
-                Result<T> result = getFuture().get(remainingTime.toMillis(), TimeUnit.MILLISECONDS);
-                synchronized (sLock) {
-                    releaseLocked();
-                    return result;
-                }
+                return mFuture.get(remainingTime.toMillis(), TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
                 // This will NEVER happen.
                 throw new AssertionError("Error receiving response", e);
@@ -222,9 +171,6 @@ public final class SynchronousResultReceiver<T> implements Parcelable {
                         Duration.ofNanos(SystemClock.elapsedRealtimeNanos() - startWaitNanoTime));
             }
         }
-        synchronized (sLock) {
-            releaseLocked();
-        }
         throw new TimeoutException();
     }
 
@@ -233,11 +179,7 @@ public final class SynchronousResultReceiver<T> implements Parcelable {
     private final class MyResultReceiver extends ISynchronousResultReceiver.Stub {
         public void send(@SuppressWarnings("rawtypes") @NonNull Result result) {
             @SuppressWarnings("unchecked") Result<T> res = (Result<T>) result;
-            CompletableFuture<Result<T>> future;
-            future = getFuture();
-            if (future != null) {
-                future.complete(res);
-            }
+            mFuture.complete(res);
         }
     }
 

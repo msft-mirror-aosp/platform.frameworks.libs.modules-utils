@@ -20,8 +20,6 @@ import static android.provider.DeviceConfig.OnPropertiesChangedListener;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assume.assumeTrue;
-
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.BadConfigException;
@@ -30,8 +28,6 @@ import android.provider.DeviceConfig.Properties;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -98,8 +94,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void setProperties() throws BadConfigException {
-        // api only present on T
-        assumeTrue(SdkLevel.isAtLeastT());
         String newKey = "key2";
         String newValue = "value2";
         DeviceConfig.setProperties(new Properties.Builder(sNamespace).setString(sKey,
@@ -110,9 +104,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void deleteProperty() {
-        // api only present on T
-        assumeTrue(SdkLevel.isAtLeastT());
-
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         assertThat(DeviceConfig.getProperty(sNamespace, sKey)).isEqualTo(sValue);
         DeviceConfig.deleteProperty(sNamespace, sKey);
@@ -127,8 +118,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void getProperties_empty() {
-        // api only present on R+
-        assumeTrue(SdkLevel.isAtLeastR());
         String newKey = "key2";
         String newValue = "value2";
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
@@ -145,8 +134,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void getProperties() {
-        // api only present on R+
-        assumeTrue(SdkLevel.isAtLeastR());
         Properties properties = DeviceConfig.getProperties(sNamespace, sKey);
         assertThat(properties.getString(sKey, null)).isNull();
 
@@ -192,8 +179,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void testListener_setProperties() throws BadConfigException, InterruptedException {
-        // api only present on T
-        assumeTrue(SdkLevel.isAtLeastT());
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String newKey = "key2";
         String newValue = "value2";
@@ -220,8 +205,6 @@ public class TestableDeviceConfigTest {
 
     @Test
     public void testListener_deleteProperty() throws InterruptedException {
-        // api only present on T
-        assumeTrue(SdkLevel.isAtLeastT());
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         OnPropertiesChangedListener changeListener = (properties) -> {
