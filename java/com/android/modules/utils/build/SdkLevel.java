@@ -24,7 +24,7 @@ import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.NonNull;
 
 /**
- * Utility class to check SDK level on a device.
+ * Utility  class to check SDK level on a device.
  *
  * @hide
  */
