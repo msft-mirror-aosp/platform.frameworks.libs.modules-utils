@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,34 +17,11 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_test {
-    name: "ModulesUtilsTestingTests",
-
-    sdk_version: "module_current",
-    min_sdk_version: "29",
-
-    defaults: [
-        "modules-utils-testable-device-config-defaults",
-    ],
-
-    srcs: ["*.java"],
-
+java_library {
+    name: "modules-testing-flaggedapi-rule",
+    srcs: ["FlaggedApiRule.java"],
+    defaults: ["modules-utils-defaults"],
     static_libs: [
-        "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.rules",
-        "modules-utils-build",
-        "platform-test-annotations",
-        "truth-prebuilt",
-    ],
-
-    libs: [
-        "android.test.mock",
-        "android.test.runner",
-    ],
-
-    test_suites: [
-        "general-tests",
-        "mts-mainline-infra",
+        "junit",
     ],
 }
