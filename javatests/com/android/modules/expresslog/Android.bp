@@ -1,5 +1,4 @@
-//
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,29 +17,19 @@ package {
 }
 
 android_test {
-    name: "ModulesUtilsTests",
+    name: "ExpressLogApisTests",
 
     sdk_version: "module_current",
-    min_sdk_version: "29",
+    min_sdk_version: "30",
 
     srcs: [
-        "com/android/internal/testing/*.java",
-        "com/android/internal/util/*.java",
-        "com/android/modules/testing/utils/*.java",
-        "com/android/modules/utils/*.java",
+        "*.java",
     ],
 
     static_libs: [
         "androidx.test.rules",
         "androidx.test.runner",
-        "modules-testing-flaggedapi-rule",
-        "modules-utils-backgroundthread",
-        "modules-utils-bytesmatcher",
-        "modules-utils-handlerexecutor",
-        "modules-utils-list-slice",
-        "modules-utils-shell-command-handler",
-        "modules-utils-statemachine",
-        "modules-utils-synchronous-result-receiver",
+        "modules-utils-expresslog",
     ],
 
     libs: [
@@ -48,5 +37,40 @@ android_test {
         "android.test.runner",
     ],
 
-    test_suites: ["general-tests"],
+    jni_libs: [
+        "libexpresslog_test_jni",
+    ],
+
+    test_suites: [
+        "general-tests",
+    ],
+}
+
+cc_library_shared {
+    name: "libexpresslog_test_jni",
+
+    sdk_version: "current",
+    min_sdk_version: "30",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+
+        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
+    ],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    header_libs: [
+        "liblog_headers",
+        "libnativehelper_header_only",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    static_libs: [
+        "libexpresslog_jni",
+        "libtextclassifier_hash_static",
+    ],
 }
