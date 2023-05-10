@@ -57,13 +57,17 @@ public final class SdkLevel {
         return SDK_INT >= 33;
     }
 
-    /**
-     * Checks if the device is running on a pre-release or release version of Android
-     * UpsideDownCake or newer
-     */
-    @ChecksSdkIntAtLeast(codename = "UpsideDownCake")
+    /** Checks if the device is running on a release version of Android UpsideDownCake or newer */
+    @ChecksSdkIntAtLeast(api = 34 /* VERSION_CODES.UpsideDownCake */, codename = "UpsideDownCake")
     public static boolean isAtLeastU() {
-        return isAtLeastPreReleaseCodename("UpsideDownCake");
+        return SDK_INT >= 34 ||
+                (SDK_INT == 33 && isAtLeastPreReleaseCodename("UpsideDownCake"));
+    }
+
+    /** Checks if the device is running on a pre-release version of Android V or newer */
+    @ChecksSdkIntAtLeast(codename = "VanillaIceCream")
+    public static boolean isAtLeastV() {
+        return SDK_INT >= 34 && isAtLeastPreReleaseCodename("VanillaIceCream");
     }
 
     private static boolean isAtLeastPreReleaseCodename(@NonNull String codename) {
