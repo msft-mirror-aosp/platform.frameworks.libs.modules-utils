@@ -35,7 +35,7 @@ inline void GetCodename(char (&codename)[PROP_VALUE_MAX]) {
 
 // Checks if the codename is a matching or higher version than the device's
 // codename.
-static bool IsAtLeastPreReleaseCodename(const char *codename) {
+[[maybe_unused]] static bool IsAtLeastPreReleaseCodename(const char *codename) {
   char deviceCodename[PROP_VALUE_MAX];
   GetCodename(deviceCodename);
   return strcmp(deviceCodename, "REL") != 0 &&
@@ -55,8 +55,9 @@ inline bool IsAtLeastT() { return android_get_device_api_level() >= 33; }
 
 // Checks if the device is running on release version of Android U or newer.
 inline bool IsAtLeastU() {
-  return android_get_device_api_level() >= 33 &&
-         detail::IsAtLeastPreReleaseCodename("U");
+  return android_get_device_api_level() >= 34 ||
+         (android_get_device_api_level() == 33 &&
+          detail::IsAtLeastPreReleaseCodename("U"));
 }
 
 } // namespace sdklevel
