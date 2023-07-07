@@ -18,10 +18,12 @@ package {
 }
 
 java_library {
-    name: "modules-testing-flaggedapi-rule",
-    srcs: ["FlaggedApiRule.java"],
+    name: "modules-utils-package-state",
+    srcs: ["PackageStateModulesUtils.java"],
     defaults: ["modules-utils-defaults"],
-    static_libs: [
-        "junit",
+    sdk_version: "system_server_current",
+    min_sdk_version: "31",
+    libs: [
+        "androidx.annotation_annotation",
     ],
 }
