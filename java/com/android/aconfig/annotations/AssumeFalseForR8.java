@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.annotation;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
+package com.android.aconfig.annotations;
+
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an API is part of a feature that is guarded by an aconfig flag.
- * </p>
- * This annotation should only appear on APIs that are marked <pre>@hide</pre>.
- *
- * @hide
+ * Denotes that the annotated method always returns false.
+ * <p>
+ * Example:
+ * <pre><code>
+ *  &#64;AssumeFalseForR8
+ *  public void foo() {
+ *      ...
+ *  }
+ * </code></pre>
+ * <p>
  */
-@Target({TYPE, METHOD, CONSTRUCTOR})
-@Retention(RetentionPolicy.SOURCE)
-public @interface FlaggedApi {
-    /**
-     * Namespace and name of aconfig flag used to guard the feature this API is part of. Expected
-     * syntax: namespace/name, e.g. "the_namespace/the_name_of_the_flag".
-     */
-    String flag() default "";
+@Retention(RetentionPolicy.CLASS)
+@Target({METHOD})
+public @interface AssumeFalseForR8 {
 }
