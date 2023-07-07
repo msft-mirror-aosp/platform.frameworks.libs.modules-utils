@@ -13,15 +13,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// JNI library for Utils.hashString
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-java_library {
-    name: "modules-testing-flaggedapi-rule",
-    srcs: ["FlaggedApiRule.java"],
-    defaults: ["modules-utils-defaults"],
+cc_library_static {
+    name: "libexpresslog_jni",
+
+    sdk_version: "current",
+    min_sdk_version: "30",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+
+        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
+    ],
+    srcs: [
+        "com_android_modules_expresslog_Utils.cpp",
+    ],
+    header_libs: [
+        "liblog_headers",
+        "libnativehelper_header_only",
+        "libtextclassifier_hash_headers",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
     static_libs: [
-        "junit",
+        "libtextclassifier_hash_static",
+    ],
+    visibility: ["//visibility:public"],
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
     ],
 }

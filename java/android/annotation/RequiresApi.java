@@ -16,26 +16,37 @@
 package android.annotation;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an API is part of a feature that is guarded by an aconfig flag.
- * </p>
- * This annotation should only appear on APIs that are marked <pre>@hide</pre>.
+ * Denotes that the annotated element should only be called on the given API level or higher.
+ *
+ * <p>This is similar in purpose to the older {@code @TargetApi} annotation, but more clearly
+ * expresses that this is a requirement on the caller, rather than being used to "suppress" warnings
+ * within the method that exceed the {@code minSdkVersion}.
  *
  * @hide
  */
-@Target({TYPE, METHOD, CONSTRUCTOR})
-@Retention(RetentionPolicy.SOURCE)
-public @interface FlaggedApi {
+@Documented
+@Retention(SOURCE)
+@Target({TYPE, METHOD, CONSTRUCTOR, FIELD, PACKAGE})
+public @interface RequiresApi {
     /**
-     * Namespace and name of aconfig flag used to guard the feature this API is part of. Expected
-     * syntax: namespace/name, e.g. "the_namespace/the_name_of_the_flag".
+     * The API level to require. Alias for {@link #api} which allows you to leave out the {@code
+     * api=} part.
      */
-    String flag() default "";
+    @IntRange(from = 1)
+    int value() default 1;
+
+    /** The API level to require */
+    @IntRange(from = 1)
+    int api() default 1;
 }
