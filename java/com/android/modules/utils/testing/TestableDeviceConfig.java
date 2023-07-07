@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
@@ -33,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.modules.utils.testing.AbstractExtendedMockitoRule.AbstractBuilder;
 
 import com.android.modules.utils.build.SdkLevel;
 
@@ -188,7 +190,11 @@ public final class TestableDeviceConfig implements StaticMockFixture {
     }
 
     private Properties getProperties(String namespace, Map<String, String> keyValues) {
-        Properties properties = Mockito.mock(Properties.class);
+        Properties.Builder builder = new Properties.Builder(namespace);
+        keyValues.forEach((k, v) -> {
+            builder.setString(k, v);
+        });
+        Properties properties = spy(builder.build());
         when(properties.getNamespace()).thenReturn(namespace);
         when(properties.getKeyset()).thenReturn(keyValues.keySet());
         when(properties.getBoolean(anyString(), anyBoolean())).thenAnswer(
@@ -277,12 +283,47 @@ public final class TestableDeviceConfig implements StaticMockFixture {
      * <pre class="prettyprint">
      * &#064;Rule
      * public final TestableDeviceConfigRule mTestableDeviceConfigRule =
-     *     new TestableDeviceConfigRule();
+     *     new TestableDeviceConfigRule(this);
      * </pre>
      */
-    public static class TestableDeviceConfigRule extends StaticMockFixtureRule {
+    public static final class TestableDeviceConfigRule extends
+            AbstractExtendedMockitoRule<TestableDeviceConfigRule, TestableDeviceConfigRuleBuilder> {
+
+        /**
+         * Creates the rule, initializing the mocks for the given test.
+         */
+        public TestableDeviceConfigRule(Object testClassInstance) {
+            this(new TestableDeviceConfigRuleBuilder(testClassInstance)
+                    .addStaticMockFixtures(TestableDeviceConfig::new));
+        }
+
+        /**
+         * Creates the rule, without initializing the mocks.
+         */
         public TestableDeviceConfigRule() {
-            super(TestableDeviceConfig::new);
+            this(new TestableDeviceConfigRuleBuilder()
+                    .addStaticMockFixtures(TestableDeviceConfig::new));
+        }
+
+        private TestableDeviceConfigRule(TestableDeviceConfigRuleBuilder builder) {
+            super(builder);
+        }
+    }
+
+    private static final class TestableDeviceConfigRuleBuilder extends
+            AbstractBuilder<TestableDeviceConfigRule, TestableDeviceConfigRuleBuilder> {
+
+        TestableDeviceConfigRuleBuilder(Object testClassInstance) {
+            super(testClassInstance);
+        }
+
+        TestableDeviceConfigRuleBuilder() {
+            super();
+        }
+
+        @Override
+        public TestableDeviceConfigRule build() {
+            return new TestableDeviceConfigRule(this);
         }
     }
 }
