@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,34 +17,23 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_test {
-    name: "ModulesUtilsTestingTests",
-
-    sdk_version: "module_current",
-    min_sdk_version: "29",
-
-    defaults: [
-        "modules-utils-testable-device-config-defaults",
+java_library {
+    name: "modules-utils-expresslog",
+    defaults: ["modules-utils-defaults"],
+    min_sdk_version: "30",
+    srcs: [
+        "*.java",
+        ":statslog-expresslog-java-gen",
     ],
-
-    srcs: ["*.java"],
-
-    static_libs: [
-        "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.rules",
-        "platform-test-annotations",
-        "truth-prebuilt",
-    ],
-
     libs: [
-        "android.test.mock",
-        "android.test.runner",
-        "framework-configinfrastructure",
+        "framework-statsd",
     ],
+}
 
-    test_suites: [
-        "general-tests",
-        "mts-mainline-infra",
-    ],
+genrule {
+    name: "statslog-expresslog-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module expresslog" +
+        " --javaPackage com.android.modules.expresslog --javaClass StatsExpressLog",
+    out: ["com/android/modules/expresslog/StatsExpressLog.java"],
 }
