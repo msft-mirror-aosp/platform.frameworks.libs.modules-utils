@@ -22,12 +22,9 @@ import android.util.Log;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.modules.utils.testing.AbstractExtendedMockitoRule.AbstractBuilder;
 
-import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.Mockito;
@@ -89,27 +86,41 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
 
     @Override
     public Statement apply(Statement base, Description description) {
-        createMockitoSession(description);
-
-        return new TestWatcher() {
+        return new Statement() {
             @Override
-            protected void succeeded(Description description) {
-                tearDown(description, /* e=*/ null);
+            public void evaluate() throws Throwable {
+                createMockitoSession(description);
+                Throwable error = null;
+                try {
+                    // TODO(b/296937563): need to add unit tests that make sure the session is
+                    // always closed
+                    base.evaluate();
+                } catch (Throwable t) {
+                    error = t;
+                }
+                try {
+                    tearDown(description, error);
+                } catch (Throwable t) {
+                    if (error != null) {
+                        Log.e(TAG, "Teardown failed for " + description.getDisplayName()
+                            + ", but not throwing it because test also threw (" + error + ")", t);
+                    } else {
+                        error = t;
+                    }
+                }
+                if (error != null) {
+                    // TODO(b/296937563): ideally should also add unit tests to make sure the
+                    // test error is thrown (in case tearDown() above fails)
+                    throw error;
+                }
             }
-
-            @Override
-            protected void skipped(AssumptionViolatedException e, Description description) {
-                tearDown(description, e);
-            }
-
-            @Override
-            protected void failed(Throwable e, Description description) {
-                tearDown(description, e);
-            }
-        }.apply(base, description);
+        };
     }
 
     private void createMockitoSession(Description description) {
+        // TODO(b/296937563): might be prudent to save the session statically so it's explicitly
+        // closed in case it fails to be created again if for some reason it was not closed by us
+        // (although that should not happen)
         Log.v(TAG, "Creating session builder with strictness " + mStrictness);
         StaticMockitoSessionBuilder mSessionBuilder = mockitoSession().strictness(mStrictness);
 
@@ -301,10 +312,8 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         @Deprecated
         public final B configureSessionBuilder(
                 SessionBuilderVisitor sessionBuilderConfigurator) {
-            Preconditions.checkState(mMockedStaticClasses.isEmpty(),
-                    "mockStatic() already called");
-            Preconditions.checkState(mSpiedStaticClasses.isEmpty(),
-                    "spyStatic() already called");
+            checkState(mMockedStaticClasses.isEmpty(), "mockStatic() already called");
+            checkState(mSpiedStaticClasses.isEmpty(), "spyStatic() already called");
             mSessionBuilderConfigurator = Objects.requireNonNull(sessionBuilderConfigurator);
             return thisBuilder();
         }
@@ -355,16 +364,14 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         }
 
         private void checkConfigureSessionBuilderNotCalled() {
-            Preconditions.checkState(mSessionBuilderConfigurator == null,
+            checkState(mSessionBuilderConfigurator == null,
                     "configureSessionBuilder() already called");
         }
 
         private Class<?> checkClassNotMockedOrSpied(Class<?> clazz) {
             Objects.requireNonNull(clazz);
-            Preconditions.checkState(!mMockedStaticClasses.contains(clazz),
-                    "class %s already mocked", clazz);
-            Preconditions.checkState(!mSpiedStaticClasses.contains(clazz),
-                    "class %s already spied", clazz);
+            checkState(!mMockedStaticClasses.contains(clazz), "class %s already mocked", clazz);
+            checkState(!mSpiedStaticClasses.contains(clazz), "class %s already spied", clazz);
             return clazz;
         }
     }
@@ -378,5 +385,13 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
          * Visits it.
          */
         void visit(StaticMockitoSessionBuilder builder);
+    }
+
+    // Copied from com.android.internal.util.Preconditions, as that method is not available on RVC
+    private static void checkState(boolean expression, String messageTemplate,
+            Object... messageArgs) {
+        if (!expression) {
+            throw new IllegalStateException(String.format(messageTemplate, messageArgs));
+        }
     }
 }
