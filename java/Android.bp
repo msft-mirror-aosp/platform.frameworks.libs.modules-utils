@@ -66,13 +66,13 @@ java_library {
     srcs: [
         "com/android/aconfig/annotations/*.java",
     ],
-    sdk_version: "current",
+    sdk_version: "core_current",
     host_supported: true,
     optimize: {
         proguard_flags_files: ["aconfig_proguard.flags"],
     },
     visibility: [
-        "//visibility:private",
+        "//visibility:public",
     ],
 }
 
@@ -114,6 +114,7 @@ filegroup {
     visibility: [
         "//frameworks/libs/modules-utils/java/com/android/modules/utils",
         "//packages/modules/Bluetooth/system/binder",
+        "//packages/modules/Bluetooth/android/app/aidl",
     ],
 }
 
