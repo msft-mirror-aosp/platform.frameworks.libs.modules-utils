@@ -77,7 +77,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
     private final Set<Class<?>> mMockedStaticClasses;
     private final Set<Class<?>> mSpiedStaticClasses;
     private final List<StaticMockFixture> mStaticMockFixtures;
-    private final @Nullable SessionBuilderVisitor mSessionBuilderConfigurator;
     private final boolean mClearInlineMocks;
 
     private MockitoSession mMockitoSession;
@@ -88,7 +87,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         mMockitoFramework = builder.mMockitoFramework;
         mMockitoSession = builder.mMockitoSession;
         mAfterSessionFinishedCallback = builder.mAfterSessionFinishedCallback;
-        mSessionBuilderConfigurator = builder.mSessionBuilderConfigurator;
         mMockedStaticClasses = builder.mMockedStaticClasses;
         mSpiedStaticClasses = builder.mSpiedStaticClasses;
         mStaticMockFixtures = builder.mStaticMockFixtures == null ? Collections.emptyList()
@@ -98,7 +96,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
                 + ", mockedStaticClasses=" + mMockedStaticClasses
                 + ", spiedStaticClasses=" + mSpiedStaticClasses
                 + ", staticMockFixtures=" + mStaticMockFixtures
-                + ", sessionBuilderConfigurator=" + mSessionBuilderConfigurator
                 + ", afterSessionFinishedCallback=" + mAfterSessionFinishedCallback
                 + ", mockitoFramework=" + mMockitoFramework
                 + ", mockitoSession=" + mMockitoSession
@@ -133,8 +130,16 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         return Collections.unmodifiableSet(staticClasses);
     }
 
-
-
+    /**
+     * Gets whether the rule should clear the inline mocks after the given test.
+     *
+     * <p>By default, it returns {@code} (unless the rule was built with
+     * {@link AbstractBuilder#dontClearInlineMocks()}, but subclasses can override to change the
+     * behavior (for example, to decide based on custom annotations).
+     */
+    protected boolean getClearInlineMethodsAtTheEnd(Description description) {
+        return mClearInlineMocks;
+    }
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -211,10 +216,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
             Log.v(TAG, "Calling spyStatic() on " + clazz);
             sessionBuilder.spyStatic(clazz);
         }
-        if (mSessionBuilderConfigurator != null) {
-            Log.v(TAG, "Visiting " + mSessionBuilderConfigurator + " with " + sessionBuilder);
-            mSessionBuilderConfigurator.visit(sessionBuilder);
-        }
     }
 
     private void setUpMockBehaviors() {
@@ -247,12 +248,13 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
                 }
             }
         } finally {
-            clearInlineMocks();
+            clearInlineMocks(description);
         }
     }
 
-    private void clearInlineMocks() {
-        if (!mClearInlineMocks) {
+    private void clearInlineMocks(Description description) {
+        boolean clearIt = getClearInlineMethodsAtTheEnd(description);
+        if (!clearIt) {
             Log.d(TAG, "NOT calling clearInlineMocks() as set on builder");
             return;
         }
@@ -278,7 +280,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         Strictness mStrictness = Strictness.LENIENT;
         @Nullable MockitoFramework mMockitoFramework;
         @Nullable MockitoSession mMockitoSession;
-        @Nullable SessionBuilderVisitor mSessionBuilderConfigurator;
         @Nullable Runnable mAfterSessionFinishedCallback;
         boolean mClearInlineMocks = true;
 
@@ -312,11 +313,9 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
          * com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder#mockStatic(Class)}.
          *
          * @throws IllegalStateException if the same class was already passed to
-         *   {@link #mockStatic(Class)} or {@link #spyStatic(Class)} or if
-         *   {@link #configureSessionBuilder(SessionBuilderVisitor)} was called before.
+         *   {@link #mockStatic(Class)} or {@link #spyStatic(Class)}.
          */
         public final B mockStatic(Class<?> clazz) {
-            checkConfigureSessionBuilderNotCalled();
             mMockedStaticClasses.add(checkClassNotMockedOrSpied(clazz));
             return thisBuilder();
         }
@@ -326,11 +325,9 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
          * com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder#spyStatic(Class)}.
          *
          * @throws IllegalStateException if the same class was already passed to
-         *   {@link #mockStatic(Class)} or {@link #spyStatic(Class)} or if
-         *   {@link #configureSessionBuilder(SessionBuilderVisitor)} was called before.
+         *   {@link #mockStatic(Class)} or {@link #spyStatic(Class)}.
          */
         public final B spyStatic(Class<?> clazz) {
-            checkConfigureSessionBuilderNotCalled();
             mSpiedStaticClasses.add(checkClassNotMockedOrSpied(clazz));
             return thisBuilder();
         }
@@ -349,25 +346,6 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
             } else {
                 mStaticMockFixtures.addAll(fixtures);
             }
-            return thisBuilder();
-        }
-
-        // TODO(b/281577492): remove once CachedAppOptimizerTest doesn't use anymore
-        /**
-         * Alternative for {@link #spyStatic(Class)} / {@link #mockStatic(Class)}; typically used
-         * when the same setup is shared by multiple tests.
-         *
-         * @deprecated use {@link #addStaticMockFixtures(Supplier...)} instead
-         *
-         * @throws IllegalStateException if {@link #mockStatic(Class)} or {@link #spyStatic(Class)}
-         * was called before.
-         */
-        @Deprecated
-        public final B configureSessionBuilder(
-                SessionBuilderVisitor sessionBuilderConfigurator) {
-            checkState(mMockedStaticClasses.isEmpty(), "mockStatic() already called");
-            checkState(mSpiedStaticClasses.isEmpty(), "spyStatic() already called");
-            mSessionBuilderConfigurator = Objects.requireNonNull(sessionBuilderConfigurator);
             return thisBuilder();
         }
 
@@ -416,28 +394,12 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
             return (B) this;
         }
 
-        private void checkConfigureSessionBuilderNotCalled() {
-            checkState(mSessionBuilderConfigurator == null,
-                    "configureSessionBuilder() already called");
-        }
-
         private Class<?> checkClassNotMockedOrSpied(Class<?> clazz) {
             Objects.requireNonNull(clazz);
             checkState(!mMockedStaticClasses.contains(clazz), "class %s already mocked", clazz);
             checkState(!mSpiedStaticClasses.contains(clazz), "class %s already spied", clazz);
             return clazz;
         }
-    }
-
-    /**
-     * Visitor for {@link StaticMockitoSessionBuilder}.
-     */
-    public interface SessionBuilderVisitor {
-
-        /**
-         * Visits it.
-         */
-        void visit(StaticMockitoSessionBuilder builder);
     }
 
     // Copied from com.android.internal.util.Preconditions, as that method is not available on RVC
