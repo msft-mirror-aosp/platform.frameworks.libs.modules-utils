@@ -84,6 +84,8 @@ filegroup {
         "android/annotation/FlaggedApi.java",
         "android/annotation/SystemApi.java",
         "android/annotation/TestApi.java",
+        // aconfig annotations
+        "com/android/aconfig/annotations/*.java",
     ],
 
     visibility: [
