@@ -14,8 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.modules.expresslog;
+package com.android.aconfig.annotations;
 
-final class Utils {
-    static native long hashString(String stringToHash);
+import static java.lang.annotation.ElementType.METHOD;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Denotes that the annotated method always returns true.
+ * <p>
+ * Example:
+ * <pre><code>
+ *  &#64;AssumeTrueForR8
+ *  public void foo() {
+ *      ...
+ *  }
+ * </code></pre>
+ * <p>
+ */
+@Retention(RetentionPolicy.CLASS)
+@Target({METHOD})
+public @interface AssumeTrueForR8 {
 }

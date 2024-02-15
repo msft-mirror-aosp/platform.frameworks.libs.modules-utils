@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,33 @@
  */
 package android.annotation;
 
-import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Denotes that a parameter, field or method return value can be null.
+ * Denotes that the annotated method validates permissions manually.
  * <p>
- * When decorating a method call parameter, this denotes that the parameter can
- * legitimately be null and the method will gracefully deal with it. Typically
- * used on optional parameters.
- * <p>
- * When decorating a method, this denotes the method might legitimately return
- * null.
- * <p>
- * This is a marker annotation and it has no specific attributes.
+ * This explicit annotation helps distinguish which of states an
+ * element may exist in:
+ * <ul>
+ * <li>Annotated with {@link EnforcePermission}, indicating that an element
+ * strictly requires one or more permissions. The verification occurs within
+ * the annotated element.
+ * <li>Annotated with {@link RequiresNoPermission}, indicating that an element
+ * requires no permissions.
+ * <li>Annotated with {@link PermissionManuallyEnforced}, indicating that the
+ * element requires some kind of permission which cannot be described using the
+ * other annotations.
+ * </ul>
  *
- * @paramDoc This value may be {@code null}.
- * @returnDoc This value may be {@code null}.
+ * @see EnforcePermission
+ * @see RequiresNoPermission
  * @hide
  */
 @Retention(CLASS)
-@Target({METHOD, PARAMETER, FIELD})
-public @interface Nullable {
+@Target({METHOD})
+public @interface PermissionManuallyEnforced {
 }

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "TeX"
+package com.android.aconfig.annotations;
 
-#include <jni.h>
-#include <log/log.h>
+import static java.lang.annotation.ElementType.METHOD;
 
-namespace android {
-extern int register_com_android_modules_expresslog_Utils(JNIEnv* env);
-}  // namespace android
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-using namespace android;
-
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    JNIEnv* env = NULL;
-    jint result = -1;
-
-    if (vm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK) {
-        ALOGE("GetEnv failed!");
-        return result;
-    }
-    ALOG_ASSERT(env, "Could not retrieve the env!");
-
-    register_com_android_modules_expresslog_Utils(env);
-    return JNI_VERSION_1_4;
+/**
+ * Denotes that the annotated method always returns false.
+ * <p>
+ * Example:
+ * <pre><code>
+ *  &#64;AssumeFalseForR8
+ *  public void foo() {
+ *      ...
+ *  }
+ * </code></pre>
+ * <p>
+ */
+@Retention(RetentionPolicy.CLASS)
+@Target({METHOD})
+public @interface AssumeFalseForR8 {
 }
