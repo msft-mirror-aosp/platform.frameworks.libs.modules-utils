@@ -1,5 +1,4 @@
-//
-// Copyright (C) 2023 The Android Open Source Project
+// Copyright (C) 2024 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +13,22 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_framework_android_packages",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-java_library {
-    name: "modules-utils-package-state",
-    srcs: ["PackageStateModulesUtils.java"],
-    defaults: ["modules-utils-defaults"],
-    sdk_version: "system_server_current",
-    min_sdk_version: "31",
-    libs: [
-        "androidx.annotation_annotation",
+android_test {
+    name: "AndroidAnnotationTests",
+    sdk_version: "module_current",
+    srcs: ["*.java"],
+    static_libs: [
+        "androidx.test.rules",
+        "androidx.test.runner",
+        "framework-annotations-lib",
+        "truth",
     ],
+    libs: [
+        "android.test.runner",
+        "framework-annotations-lib",
+    ],
+    test_suites: ["general-tests"],
 }
