@@ -22,10 +22,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.StateMachine.LogRec;
