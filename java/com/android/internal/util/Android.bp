@@ -22,6 +22,7 @@ java_library {
     srcs: ["Preconditions.java"],
     defaults: ["modules-utils-defaults"],
     libs: [
+        "error_prone_annotations",
         "unsupportedappusage",
     ],
 }
