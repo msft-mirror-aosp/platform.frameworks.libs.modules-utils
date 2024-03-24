@@ -23,6 +23,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.text.TextUtils;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -55,7 +57,9 @@ public class Preconditions {
      * @throws IllegalArgumentException if {@code expression} is false
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static void checkArgument(boolean expression, final Object errorMessage) {
+    public static void checkArgument(
+            boolean expression,
+            final @CompileTimeConstant Object errorMessage) {
         if (!expression) {
             throw new IllegalArgumentException(String.valueOf(errorMessage));
         }
@@ -72,7 +76,7 @@ public class Preconditions {
      */
     public static void checkArgument(
             final boolean expression,
-            final @NonNull String messageTemplate,
+            final @CompileTimeConstant @NonNull String messageTemplate,
             final Object... messageArgs) {
         if (!expression) {
             throw new IllegalArgumentException(String.format(messageTemplate, messageArgs));
@@ -105,7 +109,7 @@ public class Preconditions {
      * @throws IllegalArgumentException if {@code string} is empty
      */
     public static @NonNull <T extends CharSequence> T checkStringNotEmpty(final T string,
-            final Object errorMessage) {
+            final @CompileTimeConstant Object errorMessage) {
         if (TextUtils.isEmpty(string)) {
             throw new IllegalArgumentException(String.valueOf(errorMessage));
         }
@@ -124,7 +128,7 @@ public class Preconditions {
      */
     public static @NonNull <T extends CharSequence> T checkStringNotEmpty(
             final T string,
-            final @NonNull String messageTemplate,
+            final @NonNull @CompileTimeConstant String messageTemplate,
             final Object... messageArgs) {
         if (TextUtils.isEmpty(string)) {
             throw new IllegalArgumentException(String.format(messageTemplate, messageArgs));
@@ -163,7 +167,9 @@ public class Preconditions {
      */
     @Deprecated
     @UnsupportedAppUsage
-    public static @NonNull <T> T checkNotNull(final T reference, final Object errorMessage) {
+    public static @NonNull <T> T checkNotNull(
+            final T reference,
+            final @CompileTimeConstant Object errorMessage) {
         if (reference == null) {
             throw new NullPointerException(String.valueOf(errorMessage));
         }
@@ -181,7 +187,7 @@ public class Preconditions {
      */
     public static @NonNull <T> T checkNotNull(
             final T reference,
-            final @NonNull String messageTemplate,
+            final @NonNull @CompileTimeConstant String messageTemplate,
             final Object... messageArgs) {
         if (reference == null) {
             throw new NullPointerException(String.format(messageTemplate, messageArgs));
@@ -229,7 +235,7 @@ public class Preconditions {
      */
     public static void checkState(
             final boolean expression,
-            final @NonNull String messageTemplate,
+            final @NonNull @CompileTimeConstant String messageTemplate,
             final Object... messageArgs) {
         if (!expression) {
             throw new IllegalStateException(String.format(messageTemplate, messageArgs));
@@ -275,7 +281,7 @@ public class Preconditions {
      */
     public static void checkCallAuthorization(
             final boolean expression,
-            final @NonNull String messageTemplate,
+            final @NonNull @CompileTimeConstant String messageTemplate,
             final Object... messageArgs) {
         if (!expression) {
             throw new SecurityException(String.format(messageTemplate, messageArgs));
