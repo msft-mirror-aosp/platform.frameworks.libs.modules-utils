@@ -35,6 +35,11 @@ import java.util.Map;
  *
  * This is necessary as native coverage is not dumped automatically after Java/JNI tests
  * (b/185074329) and should be replaced by more generic solutions (b/185822084).
+ *
+ * Improve the current state of CLANG coverage by directly calling the __llvm_profile_write_data
+ * methods through JNI instead of sending signal (37) and monitoring the SIG status of the process
+ * which can sometimes read to a race condition also the app never knows when it finishes dumping
+ * the profile data.
  */
 public class NativeCoverageHackInstrumentationListener extends InstrumentationRunListener {
     private static final String LOG_TAG =
@@ -45,9 +50,35 @@ public class NativeCoverageHackInstrumentationListener extends InstrumentationRu
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-        maybeDumpNativeCoverage();
+        // This will first try to dump coverage through the deterministic way of loading
+        // a shared library and executing a JNI method. If that fails, we don't want to crash
+        // as some modules might not be bundling the nativecoverage.so yet!, fallback to
+        // the old signal method even if it is lses efficient.
+        // The fallback should be removed when everyone has bundled nativecoverage.so as part
+        // of their testing APK.
+        try {
+            System.loadLibrary("nativecoverage");
+            dumpCoverage();
+        } catch (UnsatisfiedLinkError e) {
+            // TODO(b/329680904): Remove fallback once the main method has been well-tested.
+            Log.w(
+                    LOG_TAG,
+                    "Failed to load libnativecoverage.so! Falling back to old way,"
+                            + " exception: %s",
+                    e);
+            maybeDumpNativeCoverage();
+        } catch (Exception e) {
+            // TODO(b/329680904): Remove fallback once the main method has been well-tested.
+            Log.w(
+                    LOG_TAG,
+                    "Failed to dump coverage through JNI. Falling back to old way, exception: %s",
+                    e);
+            maybeDumpNativeCoverage();
+        }
         super.testRunFinished(result);
     }
+
+    public native void dumpCoverage();
 
     /**
      * If this test process is instrumented for native coverage, then trigger a dump
