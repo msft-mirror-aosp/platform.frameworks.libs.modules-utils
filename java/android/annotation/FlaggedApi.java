@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * @hide
  */
 @Target({TYPE, METHOD, CONSTRUCTOR, FIELD, ANNOTATION_TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface FlaggedApi {
     /**
      * The aconfig flag used to guard the feature this API is part of. Use the aconfig
