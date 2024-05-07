@@ -52,6 +52,9 @@ java_library {
     sdk_version: "module_current",
     min_sdk_version: "29",
     visibility: ["//visibility:public"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 // TODO(b/281577492): split in 2 (one for just ExtendedMockito stuff)
