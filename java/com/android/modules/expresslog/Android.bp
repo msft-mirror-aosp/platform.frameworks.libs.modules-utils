@@ -18,10 +18,26 @@ package {
 }
 
 java_library {
-    name: "modules-testing-flaggedapi-rule",
-    srcs: ["FlaggedApiRule.java"],
+    name: "modules-utils-expresslog",
     defaults: ["modules-utils-defaults"],
-    static_libs: [
-        "junit",
+    min_sdk_version: "30",
+    srcs: [
+        "*.java",
+        ":statslog-expresslog-java-gen",
     ],
+    libs: [
+        "framework-statsd",
+    ],
+    static_libs: [
+        "expresslog-catalog",
+    ],
+}
+
+genrule {
+    name: "statslog-expresslog-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module expresslog" +
+        " --javaPackage com.android.modules.expresslog" +
+        " --javaClass StatsExpressLog",
+    out: ["com/android/modules/expresslog/StatsExpressLog.java"],
 }

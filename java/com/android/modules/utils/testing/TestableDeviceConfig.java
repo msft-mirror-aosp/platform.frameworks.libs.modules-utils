@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
@@ -33,6 +34,9 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.modules.utils.testing.AbstractExtendedMockitoRule.AbstractBuilder;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.rules.TestRule;
 import org.mockito.ArgumentMatchers;
@@ -100,53 +104,57 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         }).when(() -> DeviceConfig.setProperty(
                 anyString(), anyString(), anyString(), anyBoolean()));
 
-        doAnswer((Answer<Boolean>) invocationOnMock -> {
-            String namespace = invocationOnMock.getArgument(0);
-            String name = invocationOnMock.getArgument(1);
-            mKeyValueMap.remove(getKey(namespace, name));
-            invokeListeners(namespace, getProperties(namespace, name, null));
-            return true;
-        }).when(() -> DeviceConfig.deleteProperty(anyString(), anyString()));
+        if (SdkLevel.isAtLeastT()) {
+            doAnswer((Answer<Boolean>) invocationOnMock -> {
+                String namespace = invocationOnMock.getArgument(0);
+                String name = invocationOnMock.getArgument(1);
+                mKeyValueMap.remove(getKey(namespace, name));
+                invokeListeners(namespace, getProperties(namespace, name, null));
+                return true;
+            }).when(() -> DeviceConfig.deleteProperty(anyString(), anyString()));
 
-        doAnswer((Answer<Boolean>) invocationOnMock -> {
-            Properties properties = invocationOnMock.getArgument(0);
-            String namespace = properties.getNamespace();
-            Map<String, String> keyValues = new ArrayMap<>();
-            for (String name : properties.getKeyset()) {
-                String value = properties.getString(name, /* defaultValue= */ "");
-                mKeyValueMap.put(getKey(namespace, name), value);
-                keyValues.put(name.toLowerCase(), value);
-            }
-            invokeListeners(namespace, getProperties(namespace, keyValues));
-            return true;
-        }).when(() -> DeviceConfig.setProperties(any(Properties.class)));
+            doAnswer((Answer<Boolean>) invocationOnMock -> {
+                Properties properties = invocationOnMock.getArgument(0);
+                String namespace = properties.getNamespace();
+                Map<String, String> keyValues = new ArrayMap<>();
+                for (String name : properties.getKeyset()) {
+                    String value = properties.getString(name, /* defaultValue= */ "");
+                    mKeyValueMap.put(getKey(namespace, name), value);
+                    keyValues.put(name.toLowerCase(), value);
+                }
+                invokeListeners(namespace, getProperties(namespace, keyValues));
+                return true;
+            }).when(() -> DeviceConfig.setProperties(any(Properties.class)));
+        }
 
         doAnswer((Answer<String>) invocationOnMock -> {
             String namespace = invocationOnMock.getArgument(0);
             String name = invocationOnMock.getArgument(1);
             return mKeyValueMap.get(getKey(namespace, name));
         }).when(() -> DeviceConfig.getProperty(anyString(), anyString()));
-
-        doAnswer((Answer<Properties>) invocationOnMock -> {
-            String namespace = invocationOnMock.getArgument(0);
-            final int varargStartIdx = 1;
-            Map<String, String> keyValues = new ArrayMap<>();
-            if (invocationOnMock.getArguments().length == varargStartIdx) {
-                mKeyValueMap.entrySet().forEach(entry -> {
-                    Pair<String, String> nameSpaceAndName = getNameSpaceAndName(entry.getKey());
-                    if (!nameSpaceAndName.first.equals(namespace)) {
-                        return;
+        if (SdkLevel.isAtLeastR()) {
+            doAnswer((Answer<Properties>) invocationOnMock -> {
+                String namespace = invocationOnMock.getArgument(0);
+                final int varargStartIdx = 1;
+                Map<String, String> keyValues = new ArrayMap<>();
+                if (invocationOnMock.getArguments().length == varargStartIdx) {
+                    mKeyValueMap.entrySet().forEach(entry -> {
+                        Pair<String, String> nameSpaceAndName = getNameSpaceAndName(entry.getKey());
+                        if (!nameSpaceAndName.first.equals(namespace)) {
+                            return;
+                        }
+                        keyValues.put(nameSpaceAndName.second.toLowerCase(), entry.getValue());
+                    });
+                } else {
+                    for (int i = varargStartIdx; i < invocationOnMock.getArguments().length; ++i) {
+                        String name = invocationOnMock.getArgument(i);
+                        keyValues.put(name.toLowerCase(),
+                            mKeyValueMap.get(getKey(namespace, name)));
                     }
-                    keyValues.put(nameSpaceAndName.second.toLowerCase(), entry.getValue());
-                });
-            } else {
-                for (int i = varargStartIdx; i < invocationOnMock.getArguments().length; ++i) {
-                    String name = invocationOnMock.getArgument(i);
-                    keyValues.put(name.toLowerCase(), mKeyValueMap.get(getKey(namespace, name)));
                 }
-            }
-            return getProperties(namespace, keyValues);
-        }).when(() -> DeviceConfig.getProperties(anyString(), ArgumentMatchers.<String>any()));
+                return getProperties(namespace, keyValues);
+            }).when(() -> DeviceConfig.getProperties(anyString(), ArgumentMatchers.<String>any()));
+        }
     }
 
     /**
@@ -182,7 +190,11 @@ public final class TestableDeviceConfig implements StaticMockFixture {
     }
 
     private Properties getProperties(String namespace, Map<String, String> keyValues) {
-        Properties properties = Mockito.mock(Properties.class);
+        Properties.Builder builder = new Properties.Builder(namespace);
+        keyValues.forEach((k, v) -> {
+            builder.setString(k, v);
+        });
+        Properties properties = spy(builder.build());
         when(properties.getNamespace()).thenReturn(namespace);
         when(properties.getKeyset()).thenReturn(keyValues.keySet());
         when(properties.getBoolean(anyString(), anyBoolean())).thenAnswer(
@@ -271,12 +283,47 @@ public final class TestableDeviceConfig implements StaticMockFixture {
      * <pre class="prettyprint">
      * &#064;Rule
      * public final TestableDeviceConfigRule mTestableDeviceConfigRule =
-     *     new TestableDeviceConfigRule();
+     *     new TestableDeviceConfigRule(this);
      * </pre>
      */
-    public static class TestableDeviceConfigRule extends StaticMockFixtureRule {
+    public static final class TestableDeviceConfigRule extends
+            AbstractExtendedMockitoRule<TestableDeviceConfigRule, TestableDeviceConfigRuleBuilder> {
+
+        /**
+         * Creates the rule, initializing the mocks for the given test.
+         */
+        public TestableDeviceConfigRule(Object testClassInstance) {
+            this(new TestableDeviceConfigRuleBuilder(testClassInstance)
+                    .addStaticMockFixtures(TestableDeviceConfig::new));
+        }
+
+        /**
+         * Creates the rule, without initializing the mocks.
+         */
         public TestableDeviceConfigRule() {
-            super(TestableDeviceConfig::new);
+            this(new TestableDeviceConfigRuleBuilder()
+                    .addStaticMockFixtures(TestableDeviceConfig::new));
+        }
+
+        private TestableDeviceConfigRule(TestableDeviceConfigRuleBuilder builder) {
+            super(builder);
+        }
+    }
+
+    private static final class TestableDeviceConfigRuleBuilder extends
+            AbstractBuilder<TestableDeviceConfigRule, TestableDeviceConfigRuleBuilder> {
+
+        TestableDeviceConfigRuleBuilder(Object testClassInstance) {
+            super(testClassInstance);
+        }
+
+        TestableDeviceConfigRuleBuilder() {
+            super();
+        }
+
+        @Override
+        public TestableDeviceConfigRule build() {
+            return new TestableDeviceConfigRule(this);
         }
     }
 }

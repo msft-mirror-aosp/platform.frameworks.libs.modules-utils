@@ -14,6 +14,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_mainline_modularization",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
@@ -24,16 +25,13 @@ android_test {
     min_sdk_version: "29",
 
     srcs: [
-        "com/android/internal/testing/*.java",
         "com/android/internal/util/*.java",
-        "com/android/modules/testing/utils/*.java",
         "com/android/modules/utils/*.java",
     ],
 
     static_libs: [
         "androidx.test.rules",
         "androidx.test.runner",
-        "modules-testing-flaggedapi-rule",
         "modules-utils-backgroundthread",
         "modules-utils-bytesmatcher",
         "modules-utils-handlerexecutor",
@@ -46,6 +44,7 @@ android_test {
     libs: [
         "android.test.base",
         "android.test.runner",
+        "framework-configinfrastructure",
     ],
 
     test_suites: ["general-tests"],

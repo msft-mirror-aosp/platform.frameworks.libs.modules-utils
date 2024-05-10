@@ -22,10 +22,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.StateMachine.LogRec;
@@ -116,7 +116,7 @@ public class StateMachineTest extends TestCase {
         stateMachine.setInitialState(exampleState);
         stateMachine.start();
         assertTrue(stateMachine.toString().contains("TestStateMachine"));
-        assertTrue(stateMachine.toString().contains("(null)"));
+        assertTrue(stateMachine.toString().contains("null"));
     }
 
     @SmallTest

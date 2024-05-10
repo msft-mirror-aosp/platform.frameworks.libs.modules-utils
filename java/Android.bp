@@ -61,12 +61,49 @@ java_library {
     ],
 }
 
+java_library {
+    name: "aconfig-annotations-lib",
+    srcs: [
+        "com/android/aconfig/annotations/*.java",
+    ],
+    sdk_version: "core_current",
+    host_supported: true,
+    optimize: {
+        proguard_flags_files: ["aconfig_proguard.flags"],
+        export_proguard_flags_files: true,
+    },
+    visibility: [
+        "//visibility:public",
+    ],
+}
+
+// Identical to aconfig-annotations-lib, but sdk_version is none.
+// Used for core modules where setting sdk_version of the dependencies as
+// core_current leads to circular dependencies
+java_library {
+    name: "aconfig-annotations-lib-sdk-none",
+    srcs: [
+        "com/android/aconfig/annotations/*.java",
+    ],
+    sdk_version: "none",
+    system_modules: "core-all-system-modules",
+    host_supported: true,
+    visibility: [
+        "//visibility:public",
+    ],
+    patch_module: "java.base",
+}
+
 filegroup {
     name: "framework-api-annotations",
     srcs: [
         "android/annotation/Discouraged.java",
+        "android/annotation/FlaggedApi.java",
+        "android/annotation/IntDef.java",
         "android/annotation/SystemApi.java",
         "android/annotation/TestApi.java",
+        // aconfig annotations
+        "com/android/aconfig/annotations/*.java",
     ],
 
     visibility: [
@@ -99,6 +136,7 @@ filegroup {
     visibility: [
         "//frameworks/libs/modules-utils/java/com/android/modules/utils",
         "//packages/modules/Bluetooth/system/binder",
+        "//packages/modules/Bluetooth/android/app/aidl",
     ],
 }
 

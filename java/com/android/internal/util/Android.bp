@@ -22,6 +22,7 @@ java_library {
     srcs: ["Preconditions.java"],
     defaults: ["modules-utils-defaults"],
     libs: [
+        "error_prone_annotations",
         "unsupportedappusage",
     ],
 }
@@ -32,6 +33,17 @@ java_library {
         "IState.java",
         "State.java",
         "StateMachine.java",
+    ],
+    defaults: ["modules-utils-defaults"],
+    libs: [
+        "unsupportedappusage",
+    ],
+}
+
+java_library {
+    name: "modules-utils-fastxmlserializer",
+    srcs: [
+        "FastXmlSerializer.java",
     ],
     defaults: ["modules-utils-defaults"],
     libs: [
