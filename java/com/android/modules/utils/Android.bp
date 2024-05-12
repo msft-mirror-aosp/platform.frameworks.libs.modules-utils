@@ -87,6 +87,9 @@ java_library {
     name: "modules-utils-bytesmatcher",
     defaults: ["modules-utils-defaults"],
     srcs: ["BytesMatcher.java"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
