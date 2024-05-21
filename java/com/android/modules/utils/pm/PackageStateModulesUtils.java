@@ -22,6 +22,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.RequiresApi;
 
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageSplit;
 import com.android.server.pm.pkg.PackageState;
 
@@ -35,13 +36,16 @@ public class PackageStateModulesUtils {
      */
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static boolean isDexoptable(@NonNull PackageState packageState) {
-        if (packageState.isApex() || "android".equals(packageState.getPackageName())
-                || packageState.getAppId() <= 0) {
+        if (packageState.isApex() || "android".equals(packageState.getPackageName())) {
             return false;
         }
 
         var pkg = packageState.getAndroidPackage();
         if (pkg == null) {
+            return false;
+        }
+
+        if ((packageState.getAppId() <= 0) && !isSdkLibrary(pkg)) {
             return false;
         }
 
@@ -76,7 +80,7 @@ public class PackageStateModulesUtils {
             return true;
         }
 
-        if (!TextUtils.isEmpty(pkg.getSdkLibraryName())) {
+        if (isSdkLibrary(pkg)) {
             return true;
         }
 
@@ -85,5 +89,10 @@ public class PackageStateModulesUtils {
         }
 
         return !codeOnly && pkg.isResourceOverlay();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static boolean isSdkLibrary(AndroidPackage pkg) {
+        return !TextUtils.isEmpty(pkg.getSdkLibraryName());
     }
 }
