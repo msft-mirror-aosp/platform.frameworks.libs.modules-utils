@@ -28,37 +28,30 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
-// TODO(b/281577492): split in 2 (one for just ExtendedMockito stuff)
+// Utility for mocking DeviceConfig and other device state.
+//
 // NOTE: clients should depend on modules-utils-testable-device-config-defaults
 // instead of using this library directly (so it sets the proper JNI dependencies)
 java_library {
     name: "modules-utils-testable-device-config",
     srcs: [
-        "AbstractExtendedMockitoRule.java",
-        "StaticMockFixture.java",
-        "ExtendedMockitoRule.java",
         "TestableDeviceConfig.java",
     ],
     static_libs: [
-        "androidx.test.rules",
-        "mockito-target-extended-minus-junit4",
         "modules-utils-build",
-        "modules-utils-preconditions",
+        "modules-utils-extended-mockito-rule",
     ],
     libs: [
         "framework-configinfrastructure",
-        "framework-annotations-lib",
     ],
-    sdk_version: "module_current",
-    min_sdk_version: "29",
     visibility: ["//visibility:public"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
-// TODO(b/281577492): split in 2 (one for just ExtendedMockito stuff)
 // Utility for mocking DeviceConfig and other device state.
+//
+// NOTE: if you're only using ExtendedMockitoRule (without TestableDevicConfig), you should use
+// modules-utils-extended-mockito-rule-defaults instead
+//
 // In order to use these utils successfully, both Java code and native libraries will be required.
 // If your code is in a library, you will have to depend on these defaults both in the library as
 // well as in the android_test that it gets linked into.
@@ -67,6 +60,50 @@ java_defaults {
     name: "modules-utils-testable-device-config-defaults",
     static_libs: ["modules-utils-testable-device-config"],
     compile_multilib: "both",
+    defaults: ["modules-utils-extended-mockito-rule-defaults"],
+    defaults_visibility: ["//visibility:public"],
+}
+
+// Utility for using ExtendedMockitoRule.
+//
+// NOTE: most clients should depend on modules-utils-extended-mockito-rule-defaults
+// instead of using this library directly (so it sets the proper JNI dependencies)
+java_library {
+    name: "modules-utils-extended-mockito-rule",
+    srcs: [
+        "AbstractExtendedMockitoRule.java",
+        "StaticMockFixture.java",
+        "ExtendedMockitoRule.java",
+    ],
+    static_libs: [
+        "junit",
+        "mockito-target-extended-minus-junit4",
+    ],
+    libs: [
+        "framework-annotations-lib", // @VisibleForTesting
+    ],
+    sdk_version: "module_current",
+    min_sdk_version: "29",
+    //    compile_multilib: "both",
+    // TODO(b/338434399): figure out why adding compile_multib causes a failure:
+    // In file included from build/make/core/soong_java_prebuilt.mk:38:
+    // build/make/core/base_rules.mk:300: error: frameworks/libs/modules-utils/java/com/android/modules/utils/testing:
+    // MODULE.TARGET.JAVA_LIBRARIES.modules-utils-extended-mockito-rule already defined by frameworks/libs/modules-utils/java/com/android/modules/utils/testing.
+    visibility: ["//visibility:public"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
+}
+
+// Utility for using ExtendedMockitoRule.
+//
+// In order to use these utils successfully, both Java code and native libraries will be required.
+// If your code is in a library, you will have to depend on these defaults both in the library as
+// well as in the android_test that it gets linked into.
+// You will also need to specify android:debuggable="true" in the test's manifest.
+java_defaults {
+    name: "modules-utils-extended-mockito-rule-defaults",
+    static_libs: ["modules-utils-extended-mockito-rule"],
     jni_libs: [
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
