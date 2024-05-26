@@ -59,6 +59,7 @@ java_library {
 java_defaults {
     name: "modules-utils-testable-device-config-defaults",
     static_libs: ["modules-utils-testable-device-config"],
+    compile_multilib: "both",
     defaults: ["modules-utils-extended-mockito-rule-defaults"],
     defaults_visibility: ["//visibility:public"],
 }
