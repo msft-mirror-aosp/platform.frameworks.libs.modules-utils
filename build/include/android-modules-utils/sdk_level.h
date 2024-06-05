@@ -54,16 +54,13 @@ inline bool IsAtLeastS() { return android_get_device_api_level() >= 31; }
 inline bool IsAtLeastT() { return android_get_device_api_level() >= 33; }
 
 // Checks if the device is running on release version of Android U or newer.
-inline bool IsAtLeastU() {
-  return android_get_device_api_level() >= 34 ||
-         (android_get_device_api_level() == 33 &&
-          detail::IsAtLeastPreReleaseCodename("U"));
-}
+inline bool IsAtLeastU() { return android_get_device_api_level() >= 34; }
 
 // Checks if the device is running on release version of Android V or newer.
 inline bool IsAtLeastV() {
-  return android_get_device_api_level() >= 34 &&
-         detail::IsAtLeastPreReleaseCodename("VanillaIceCream");
+  return android_get_device_api_level() >= 35 ||
+         (android_get_device_api_level() == 34 &&
+          detail::IsAtLeastPreReleaseCodename("VanillaIceCream"));
 }
 
 } // namespace sdklevel
