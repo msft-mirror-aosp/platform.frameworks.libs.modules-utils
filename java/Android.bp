@@ -102,6 +102,7 @@ filegroup {
         "android/annotation/IntDef.java",
         "android/annotation/SystemApi.java",
         "android/annotation/TestApi.java",
+        "android/annotation/UserIdInt.java",
         // aconfig annotations
         "com/android/aconfig/annotations/*.java",
     ],
