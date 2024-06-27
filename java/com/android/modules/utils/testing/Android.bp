@@ -84,11 +84,6 @@ java_library {
     ],
     sdk_version: "module_current",
     min_sdk_version: "29",
-    //    compile_multilib: "both",
-    // TODO(b/338434399): figure out why adding compile_multib causes a failure:
-    // In file included from build/make/core/soong_java_prebuilt.mk:38:
-    // build/make/core/base_rules.mk:300: error: frameworks/libs/modules-utils/java/com/android/modules/utils/testing:
-    // MODULE.TARGET.JAVA_LIBRARIES.modules-utils-extended-mockito-rule already defined by frameworks/libs/modules-utils/java/com/android/modules/utils/testing.
     visibility: ["//visibility:public"],
     lint: {
         baseline_filename: "lint-baseline.xml",
@@ -104,6 +99,7 @@ java_library {
 java_defaults {
     name: "modules-utils-extended-mockito-rule-defaults",
     static_libs: ["modules-utils-extended-mockito-rule"],
+    compile_multilib: "both",
     jni_libs: [
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
