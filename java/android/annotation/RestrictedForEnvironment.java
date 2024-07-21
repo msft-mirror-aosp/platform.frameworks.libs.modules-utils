@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
  */
 @Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(RestrictedFor.Container.class)
-public @interface RestrictedFor {
+@Repeatable(RestrictedForEnvironment.Container.class)
+public @interface RestrictedForEnvironment {
 
     /** List of environments where the entity is restricted. */
     Environment[] environments();
@@ -68,11 +68,12 @@ public @interface RestrictedFor {
     }
 
     /**
-     * Container for {@link RestrictedFor} that allows it to be applied repeatedly to types.
+     * Container for {@link RestrictedForEnvironment} that allows it to be applied repeatedly to
+     * types.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(TYPE)
     @interface Container {
-        RestrictedFor[] value();
+        RestrictedForEnvironment[] value();
     }
 }
