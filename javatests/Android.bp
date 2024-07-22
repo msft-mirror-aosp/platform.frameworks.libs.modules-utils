@@ -38,7 +38,6 @@ android_test {
         "modules-utils-list-slice",
         "modules-utils-shell-command-handler",
         "modules-utils-statemachine",
-        "modules-utils-synchronous-result-receiver",
     ],
 
     libs: [
