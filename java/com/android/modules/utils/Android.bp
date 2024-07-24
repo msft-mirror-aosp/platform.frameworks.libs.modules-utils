@@ -87,6 +87,9 @@ java_library {
     name: "modules-utils-bytesmatcher",
     defaults: ["modules-utils-defaults"],
     srcs: ["BytesMatcher.java"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
@@ -105,13 +108,4 @@ java_library {
     name: "modules-utils-shell-command-handler",
     defaults: ["modules-utils-defaults"],
     srcs: ["BasicShellCommandHandler.java"],
-}
-
-java_library {
-    name: "modules-utils-synchronous-result-receiver",
-    defaults: ["modules-utils-defaults"],
-    srcs: [
-        ":modules-utils-synchronous-result-receiver-aidl",
-        "SynchronousResultReceiver.java",
-    ],
 }
