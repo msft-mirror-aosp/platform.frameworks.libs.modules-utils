@@ -109,12 +109,3 @@ java_library {
     defaults: ["modules-utils-defaults"],
     srcs: ["BasicShellCommandHandler.java"],
 }
-
-java_library {
-    name: "modules-utils-synchronous-result-receiver",
-    defaults: ["modules-utils-defaults"],
-    srcs: [
-        ":modules-utils-synchronous-result-receiver-aidl",
-        "SynchronousResultReceiver.java",
-    ],
-}
