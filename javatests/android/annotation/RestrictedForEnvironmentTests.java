@@ -18,19 +18,20 @@ package android.annotation;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.annotation.RestrictedFor.Environment;
+import android.annotation.RestrictedForEnvironment.Environment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class RestrictedForTests {
+public class RestrictedForEnvironmentTests {
 
     @Test
     public void testAnnotationAvailableInRuntime() throws Exception {
         ClassWithAnnotation clz = new ClassWithAnnotation();
-        RestrictedFor annotation = clz.getClass().getAnnotation(RestrictedFor.class);
+        RestrictedForEnvironment annotation = clz.getClass().getAnnotation(
+                RestrictedForEnvironment.class);
 
         assertThat(annotation).isNotNull();
     }
@@ -38,7 +39,8 @@ public class RestrictedForTests {
     @Test
     public void testAnnotationIsRepeatable() throws Exception {
         ClassWithRepeatedAnnotation clz = new ClassWithRepeatedAnnotation();
-        RestrictedFor[] annotations = clz.getClass().getAnnotationsByType(RestrictedFor.class);
+        RestrictedForEnvironment[] annotations = clz.getClass().getAnnotationsByType(
+                RestrictedForEnvironment.class);
 
         assertThat(annotations).hasLength(2);
     }
@@ -46,7 +48,8 @@ public class RestrictedForTests {
     @Test
     public void testAnnotationParameters() throws Exception {
         ClassWithAnnotation clz = new ClassWithAnnotation();
-        RestrictedFor annotation = clz.getClass().getAnnotation(RestrictedFor.class);
+        RestrictedForEnvironment annotation = clz.getClass().getAnnotation(
+                RestrictedForEnvironment.class);
 
         Environment[] e = annotation.environments();
         assertThat(e).asList().containsExactly(Environment.SDK_SANDBOX);
@@ -57,7 +60,8 @@ public class RestrictedForTests {
     @Test
     public void testAnnotationParameters_environmentToString() throws Exception {
         ClassWithAnnotation clz = new ClassWithAnnotation();
-        RestrictedFor annotation = clz.getClass().getAnnotation(RestrictedFor.class);
+        RestrictedForEnvironment annotation = clz.getClass().getAnnotation(
+                RestrictedForEnvironment.class);
 
         Environment e = annotation.environments()[0];
         assertThat(e).isEqualTo(Environment.SDK_SANDBOX);
@@ -67,22 +71,25 @@ public class RestrictedForTests {
     @Test
     public void testAnnotationParameters_environment_multipleEnvironments() throws Exception {
         ClassWithMultipleEnvironment clz = new ClassWithMultipleEnvironment();
-        RestrictedFor annotation = clz.getClass().getAnnotation(RestrictedFor.class);
+        RestrictedForEnvironment annotation = clz.getClass().getAnnotation(
+                RestrictedForEnvironment.class);
 
         Environment[] e = annotation.environments();
         assertThat(e).asList().containsExactly(Environment.SDK_SANDBOX, Environment.SDK_SANDBOX);
     }
 
-    @RestrictedFor(environments=Environment.SDK_SANDBOX, from=33)
+    @RestrictedForEnvironment(environments=Environment.SDK_SANDBOX, from=33)
     private static class ClassWithAnnotation {
     }
 
-    @RestrictedFor(environments=Environment.SDK_SANDBOX, from=0)
-    @RestrictedFor(environments=Environment.SDK_SANDBOX, from=0)
+    @RestrictedForEnvironment(environments=Environment.SDK_SANDBOX, from=0)
+    @RestrictedForEnvironment(environments=Environment.SDK_SANDBOX, from=0)
     private static class ClassWithRepeatedAnnotation {
     }
 
-    @RestrictedFor(environments={Environment.SDK_SANDBOX, Environment.SDK_SANDBOX}, from=0)
+    @RestrictedForEnvironment(
+        environments={Environment.SDK_SANDBOX, Environment.SDK_SANDBOX},
+        from=0)
     private static class ClassWithMultipleEnvironment {
     }
 }
