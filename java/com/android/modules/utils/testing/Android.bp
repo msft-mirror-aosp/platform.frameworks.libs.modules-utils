@@ -42,7 +42,7 @@ java_library {
         "modules-utils-extended-mockito-rule",
     ],
     libs: [
-        "framework-configinfrastructure",
+        "framework-configinfrastructure.stubs.module_lib",
     ],
     visibility: ["//visibility:public"],
 }
