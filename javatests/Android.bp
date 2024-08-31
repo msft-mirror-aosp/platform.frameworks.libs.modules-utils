@@ -41,9 +41,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.base",
-        "android.test.runner",
-        "framework-configinfrastructure",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
+        "framework-configinfrastructure.stubs.module_lib",
     ],
 
     test_suites: ["general-tests"],
