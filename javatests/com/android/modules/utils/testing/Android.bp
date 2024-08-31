@@ -39,9 +39,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.runner",
-        "framework-configinfrastructure",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+        "framework-configinfrastructure.stubs.module_lib",
     ],
 
     test_suites: [
