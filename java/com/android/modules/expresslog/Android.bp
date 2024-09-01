@@ -26,7 +26,7 @@ java_library {
         ":statslog-expresslog-java-gen",
     ],
     libs: [
-        "framework-statsd",
+        "framework-statsd.stubs.module_lib",
     ],
     static_libs: [
         "expresslog-catalog",
