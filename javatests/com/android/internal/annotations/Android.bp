@@ -32,7 +32,7 @@ android_test {
         "framework-annotations-lib",
     ],
 
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
 
     // Note: We explicitly optimize this test target to validate post-optimized
     // code paths and their interop with annotations.
