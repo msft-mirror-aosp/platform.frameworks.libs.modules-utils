@@ -38,13 +38,12 @@ android_test {
         "modules-utils-list-slice",
         "modules-utils-shell-command-handler",
         "modules-utils-statemachine",
-        "modules-utils-synchronous-result-receiver",
     ],
 
     libs: [
-        "android.test.base",
-        "android.test.runner",
-        "framework-configinfrastructure",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
+        "framework-configinfrastructure.stubs.module_lib",
     ],
 
     test_suites: ["general-tests"],
