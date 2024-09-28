@@ -21,11 +21,13 @@ import java.util.List;
 
 public class ClassWithWeaklyReferencedField {
 
-    // Without this annotation, `mKeptField` could be optimized away after
-    // tree shaking.
-    @KeepForWeakReference private final Object mKeptField = new Integer(1);
+    // Without this annotation, `mKeptField` could be optimized away after tree shaking.
+    @KeepForWeakReference
+    private final Integer mKeptField = 7;
+    private final Integer mStrippedField = 77;
 
     public ClassWithWeaklyReferencedField(List<WeakReference<Object>> weakRefs) {
         weakRefs.add(new WeakReference<>(mKeptField));
+        weakRefs.add(new WeakReference<>(mStrippedField));
     }
 }
