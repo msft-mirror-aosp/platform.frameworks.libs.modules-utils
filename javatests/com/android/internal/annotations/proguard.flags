@@ -1,2 +1,4 @@
--keep class * extends junit.framework.Test { *; }
--keep class * extends junit.framework.TestCase { *; }
+-keep class org.junit.runners.JUnit4 { *; }
+-keep @org.junit.runner.RunWith class * {
+    public *;
+}
