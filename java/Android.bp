@@ -29,6 +29,7 @@ filegroup {
     // Prefer using framework-annotations-lib wherever possible.
     visibility: [
         "//frameworks/base",
+        "//frameworks/base/tools/processors/property_cache",
         "//frameworks/base/tools/processors/intdef_mappings",
     ],
 }
