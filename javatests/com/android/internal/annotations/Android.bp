@@ -29,10 +29,13 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "androidx.test.runner",
-        "framework-annotations-lib",
+        "truth",
     ],
 
-    libs: ["android.test.runner"],
+    libs: [
+        "android.test.runner.stubs.system",
+        "framework-annotations-lib",
+    ],
 
     // Note: We explicitly optimize this test target to validate post-optimized
     // code paths and their interop with annotations.
@@ -42,6 +45,11 @@ android_test {
         shrink: true,
         proguard_flags_files: ["proguard.flags"],
     },
+
+    // Explicitly request release mode, overriding the implicit debug mode used
+    // in eng builds that would disable bytecode optimizations. This ensures
+    // consistent test behavior across test suite build configurations.
+    dxflags: ["--release"],
 
     test_suites: ["general-tests"],
 }
