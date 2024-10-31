@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,23 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 @SmallTest
-public class KeepForWeakReferenceTest {
+public class WeaklyReferencedCallbackTest {
     @Test
-    public void testAnnotatedMemberKept() throws Exception {
+    public void testAnnotatedCallbackMemberKept() throws Exception {
         // Note: This code is simply to exercise the class behavior to ensure
         // that it's kept during compilation.
         List<WeakReference<Object>> weakRefs = new ArrayList<>();
-        ClassWithWeaklyReferencedField instance = new ClassWithWeaklyReferencedField(weakRefs);
+        ClassWithWeaklyReferencedCallback instance =
+                new ClassWithWeaklyReferencedCallback(weakRefs);
 
-        // Ensure annotated fields are kept.
+        // Ensure fields of annotated callback types are kept.
         // Note: We use an intermediate string field variable to avoid R8 using the reflection
         // call itself (with the string constant) as an implicit Keep signal.
-        String[] keptFields = {"mKeptField"};
+        String[] keptFields = {"mKeptCallback"};
         for (String field : keptFields) {
             assertThat(instance.getClass().getDeclaredField(field)).isNotNull();
         }
-        String[] strippedFields = {"mStrippedField"};
+        String[] strippedFields = {"mStrippedCallback"};
         for (String field : strippedFields) {
             assertThrows(
                     NoSuchFieldException.class, () -> instance.getClass().getDeclaredField(field));
