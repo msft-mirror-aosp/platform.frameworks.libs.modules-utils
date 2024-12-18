@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 
 package com.android.internal.annotations;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-
-public class ClassWithWeaklyReferencedField {
-
-    // Without this annotation, `mKeptField` could be optimized away after tree shaking.
-    @KeepForWeakReference
-    private final Integer mKeptField = 7;
-    private final Integer mStrippedField = 77;
-
-    public ClassWithWeaklyReferencedField(List<WeakReference<Object>> weakRefs) {
-        weakRefs.add(new WeakReference<>(mKeptField));
-        weakRefs.add(new WeakReference<>(mStrippedField));
-    }
+public enum CacheModifier {
+    /**
+     * This modifier is used to indicate that the annotated method should be cached in as a static
+     * field. When STATIC is not present in
+     * {@link com.android.internal.annotations.CachedProperty#modsFlagOnOrNone} then generated cache
+     * field will not be static.
+     */
+    STATIC,
 }

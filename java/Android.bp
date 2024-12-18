@@ -22,20 +22,15 @@ filegroup {
     srcs: [
         ":framework-metalava-annotations",
         "com/android/internal/annotations/*.java",
+        "android/ravenwood/annotation/*.java",
     ],
 
-    // TODO: Prune this list
+    // This list is intentionally restricted, with few exceptions.
+    // Prefer using framework-annotations-lib wherever possible.
     visibility: [
         "//frameworks/base",
-        "//frameworks/base/services/net",
+        "//frameworks/base/tools/processors/property_cache",
         "//frameworks/base/tools/processors/intdef_mappings",
-        "//frameworks/libs/net/common",
-        "//packages/apps/CellBroadcastReceiver",
-        "//packages/apps/CellBroadcastReceiver/legacy",
-        "//packages/modules/CellBroadcastService",
-        "//packages/modules/NetworkStack/common/netlinkclient",
-        "//packages/modules/NetworkStack/common/networkstackclient",
-        "//packages/services/Iwlan",
     ],
 }
 
@@ -128,6 +123,18 @@ filegroup {
     visibility: [
         "//frameworks/base/wifi",
         "//packages/modules/Wifi/framework",
+        "//frameworks/libs/modules-utils/java/com/android/modules/utils",
+    ],
+}
+
+filegroup {
+    name: "module-utils-future-aidls",
+    srcs: [
+        "com/android/modules/utils/AndroidFuture.aidl",
+        "com/android/modules/utils/IAndroidFuture.aidl",
+    ],
+    visibility: [
+        "//packages/modules/NeuralNetworks/framework",
         "//frameworks/libs/modules-utils/java/com/android/modules/utils",
     ],
 }

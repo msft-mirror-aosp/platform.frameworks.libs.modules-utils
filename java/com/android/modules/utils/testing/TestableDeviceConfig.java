@@ -31,6 +31,7 @@ import static org.mockito.Mockito.spy;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
@@ -41,13 +42,16 @@ import com.android.modules.utils.build.SdkLevel;
 import org.junit.rules.TestRule;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * TestableDeviceConfig is a {@link StaticMockFixture} that uses ExtendedMockito to replace the real
@@ -56,20 +60,20 @@ import java.util.concurrent.Executor;
  */
 public final class TestableDeviceConfig implements StaticMockFixture {
 
-    private Map<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>>
+    private static final String TAG = TestableDeviceConfig.class.getSimpleName();
+
+    private final Map<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>>
             mOnPropertiesChangedListenerMap = new HashMap<>();
-    private Map<String, String> mKeyValueMap = new ConcurrentHashMap<>();
+    private final Map<String, String> mKeyValueMap = new ConcurrentHashMap<>();
 
     /**
      * Clears out all local overrides.
      */
     public void clearDeviceConfig() {
+        Log.i(TAG, "clearDeviceConfig()");
         mKeyValueMap.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StaticMockitoSessionBuilder setUpMockedClasses(
             StaticMockitoSessionBuilder sessionBuilder) {
@@ -77,12 +81,10 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         return sessionBuilder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setUpMockBehaviors() {
         doAnswer((Answer<Void>) invocationOnMock -> {
+            log(invocationOnMock);
             String namespace = invocationOnMock.getArgument(0);
             Executor executor = invocationOnMock.getArgument(1);
             DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener =
@@ -95,6 +97,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                 any(DeviceConfig.OnPropertiesChangedListener.class)));
 
         doAnswer((Answer<Boolean>) invocationOnMock -> {
+            log(invocationOnMock);
             String namespace = invocationOnMock.getArgument(0);
             String name = invocationOnMock.getArgument(1);
             String value = invocationOnMock.getArgument(2);
@@ -106,6 +109,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
 
         if (SdkLevel.isAtLeastT()) {
             doAnswer((Answer<Boolean>) invocationOnMock -> {
+                log(invocationOnMock);
                 String namespace = invocationOnMock.getArgument(0);
                 String name = invocationOnMock.getArgument(1);
                 mKeyValueMap.remove(getKey(namespace, name));
@@ -114,6 +118,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
             }).when(() -> DeviceConfig.deleteProperty(anyString(), anyString()));
 
             doAnswer((Answer<Boolean>) invocationOnMock -> {
+                log(invocationOnMock);
                 Properties properties = invocationOnMock.getArgument(0);
                 String namespace = properties.getNamespace();
                 Map<String, String> keyValues = new ArrayMap<>();
@@ -128,12 +133,14 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         }
 
         doAnswer((Answer<String>) invocationOnMock -> {
+            log(invocationOnMock);
             String namespace = invocationOnMock.getArgument(0);
             String name = invocationOnMock.getArgument(1);
             return mKeyValueMap.get(getKey(namespace, name));
         }).when(() -> DeviceConfig.getProperty(anyString(), anyString()));
         if (SdkLevel.isAtLeastR()) {
             doAnswer((Answer<Properties>) invocationOnMock -> {
+                log(invocationOnMock);
                 String namespace = invocationOnMock.getArgument(0);
                 final int varargStartIdx = 1;
                 Map<String, String> keyValues = new ArrayMap<>();
@@ -157,11 +164,9 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void tearDown() {
+        Log.i(TAG, "tearDown()");
         clearDeviceConfig();
         mOnPropertiesChangedListenerMap.clear();
     }
@@ -179,9 +184,27 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         for (DeviceConfig.OnPropertiesChangedListener listener :
                 mOnPropertiesChangedListenerMap.keySet()) {
             if (namespace.equals(mOnPropertiesChangedListenerMap.get(listener).first)) {
+                Log.d(TAG, "Calling listener " + listener + " for changes on namespace "
+                        + namespace);
                 mOnPropertiesChangedListenerMap.get(listener).second.execute(
                         () -> listener.onPropertiesChanged(properties));
             }
+        }
+    }
+
+    private void log(InvocationOnMock invocation) {
+        if (!Log.isLoggable(TAG, Log.VERBOSE)) {
+            // Avoid stream allocation below if it's disabled...
+            return;
+        }
+        // InvocationOnMock.toString() prints one argument per line, which would spam logcat
+        try {
+            Log.v(TAG, "answering " + invocation.getMethod().getName() + "("
+                    + Arrays.stream(invocation.getArguments()).map(Object::toString)
+                    .collect(Collectors.joining(", ")) + ")");
+        } catch (Exception e) {
+            // Fallback in case logic above fails
+            Log.v(TAG, "answering " + invocation);
         }
     }
 
@@ -199,6 +222,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         when(properties.getKeyset()).thenReturn(keyValues.keySet());
         when(properties.getBoolean(anyString(), anyBoolean())).thenAnswer(
                 invocation -> {
+                    log(invocation);
                     String key = invocation.getArgument(0);
                     boolean defaultValue = invocation.getArgument(1);
                     final String value = keyValues.get(key.toLowerCase());
@@ -211,6 +235,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         );
         when(properties.getFloat(anyString(), anyFloat())).thenAnswer(
                 invocation -> {
+                    log(invocation);
                     String key = invocation.getArgument(0);
                     float defaultValue = invocation.getArgument(1);
                     final String value = keyValues.get(key.toLowerCase());
@@ -227,6 +252,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         );
         when(properties.getInt(anyString(), anyInt())).thenAnswer(
                 invocation -> {
+                    log(invocation);
                     String key = invocation.getArgument(0);
                     int defaultValue = invocation.getArgument(1);
                     final String value = keyValues.get(key.toLowerCase());
@@ -243,6 +269,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         );
         when(properties.getLong(anyString(), anyLong())).thenAnswer(
                 invocation -> {
+                    log(invocation);
                     String key = invocation.getArgument(0);
                     long defaultValue = invocation.getArgument(1);
                     final String value = keyValues.get(key.toLowerCase());
@@ -259,6 +286,7 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         );
         when(properties.getString(anyString(), nullable(String.class))).thenAnswer(
                 invocation -> {
+                    log(invocation);
                     String key = invocation.getArgument(0);
                     String defaultValue = invocation.getArgument(1);
                     final String value = keyValues.get(key.toLowerCase());
