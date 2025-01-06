@@ -127,6 +127,18 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "module-utils-future-aidls",
+    srcs: [
+        "com/android/modules/utils/AndroidFuture.aidl",
+        "com/android/modules/utils/IAndroidFuture.aidl",
+    ],
+    visibility: [
+        "//packages/modules/NeuralNetworks/framework",
+        "//frameworks/libs/modules-utils/java/com/android/modules/utils",
+    ],
+}
+
 // This file group is deprecated; new users should use modules-utils-preconditions
 filegroup {
     name: "modules-utils-preconditions-srcs",

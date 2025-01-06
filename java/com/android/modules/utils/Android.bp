@@ -109,3 +109,18 @@ java_library {
     defaults: ["modules-utils-defaults"],
     srcs: ["BasicShellCommandHandler.java"],
 }
+
+java_library {
+    name: "modules-utils-infra",
+    defaults: ["modules-utils-defaults"],
+    srcs: [
+        "AndroidFuture.java",
+        "ServiceConnector.java",
+        ":module-utils-future-aidls",
+    ],
+    static_libs: [
+        "modules-utils-handlerexecutor",
+        "modules-utils-preconditions",
+    ],
+    min_sdk_version: "33",
+}
