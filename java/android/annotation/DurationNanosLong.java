@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package android.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -26,12 +25,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Denotes that the annotated element is a multi-user user ID. This is
- * <em>not</em> the same as a UID.
- *
+ * @memberDoc Value is a non-negative duration in nanoseconds.
+ * @paramDoc Value is a non-negative duration in nanoseconds.
+ * @returnDoc Value is a non-negative duration in nanoseconds.
  * @hide
  */
 @Retention(SOURCE)
-@Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE})
-public @interface UserIdInt {
+@Target({METHOD, PARAMETER, FIELD})
+public @interface DurationNanosLong {
 }
