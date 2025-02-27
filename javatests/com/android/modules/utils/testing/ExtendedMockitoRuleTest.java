@@ -40,6 +40,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoFramework;
 import org.mockito.MockitoSession;
 import org.mockito.exceptions.misusing.UnnecessaryStubbingException;
@@ -598,6 +599,19 @@ public final class ExtendedMockitoRuleTest {
 
         assertWithMessage("exception").that(thrown).isSameInstanceAs(mockitoSession.e);
         assertWithMessage("mockito framework cleared").that(mockitoFramework.called).isTrue();
+    }
+
+    @Test
+    public void testMockitoSessionFinished_whenStaticMockFixturesSetupFailed() throws Throwable {
+        RuntimeException exception = new RuntimeException("D'OH!");
+        doThrow(exception).when(mStaticMockFixture1).setUpMockBehaviors();
+
+        assertThrows(Exception.class,
+                () -> mBuilder.addStaticMockFixtures(mSupplier1)
+                        .build().apply(mStatement, mDescription).evaluate());
+
+        // Assert that the previous session was closed.
+        Mockito.mockitoSession().startMocking().finishMocking();
     }
 
     @Test
