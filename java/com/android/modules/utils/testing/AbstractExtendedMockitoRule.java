@@ -146,9 +146,9 @@ public abstract class AbstractExtendedMockitoRule<R extends AbstractExtendedMock
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                createMockitoSession(base, description);
                 Throwable error = null;
                 try {
+                    createMockitoSession(base, description);
                     // TODO(b/296937563): need to add unit tests that make sure the session is
                     // always closed
                     base.evaluate();
