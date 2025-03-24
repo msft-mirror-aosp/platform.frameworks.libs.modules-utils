@@ -41,7 +41,6 @@ android_test {
     // code paths and their interop with annotations.
     optimize: {
         enabled: true,
-        enabled_on_eng: true,
         optimize: true,
         shrink: true,
         proguard_flags_files: ["proguard.flags"],
